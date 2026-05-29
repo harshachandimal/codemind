@@ -45,7 +45,7 @@ No code is **executed** on the server. All analysis is performed through static 
 |---|---|
 | Frontend | React (with Monaco Editor) |
 | Backend API | Laravel (PHP) |
-| Database | PostgreSQL |
+| Database | MySQL (via WampServer for local dev) |
 | Queue / Cache | Redis |
 | Analysis Microservice | Node.js (future phase) |
 | Containerization | Docker |

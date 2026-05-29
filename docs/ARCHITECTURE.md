@@ -38,7 +38,7 @@ The MVP uses a straightforward three-tier architecture:
                    │
                    ▼
 ┌──────────────────────────────────────────────────┐
-│               PostgreSQL Database                │
+│          MySQL Database (via WampServer)          │
 │                                                  │
 │   - users table                                  │
 │   - analyses table                               │
@@ -53,7 +53,7 @@ The MVP uses a straightforward three-tier architecture:
 | Frontend | React + Vite | Component-driven UI, large ecosystem |
 | Code Editor | Monaco Editor | Same engine as VS Code; rich JS support |
 | Backend API | Laravel 11 (PHP) | Mature, opinionated, excellent ORM/auth |
-| Database | PostgreSQL | Relational, reliable, JSON support |
+| Database | MySQL 9.x (via WampServer) | Relational, reliable, local WAMP integration |
 | Auth | Laravel Sanctum | SPA-friendly token authentication |
 
 ---
@@ -79,8 +79,9 @@ As the platform grows, the architecture will evolve to handle heavier analysis w
          │                           │
          ▼                           ▼
 ┌─────────────────┐       ┌──────────────────────────┐
-│  PostgreSQL DB  │       │      Redis Queue          │
-│                 │       │   (Laravel Horizon)       │
+│    MySQL DB     │       │      Redis Queue          │
+│ (or PostgreSQL/ │       │   (Laravel Horizon)       │
+│  MariaDB later) │       │                           │
 └─────────────────┘       └──────────┬───────────────┘
                                      │
                                      ▼
@@ -101,7 +102,7 @@ As the platform grows, the architecture will evolve to handle heavier analysis w
 Laravel is chosen as the primary backend for several reasons:
 
 1. **Mature Ecosystem** — Laravel provides built-in solutions for authentication, validation, ORM, queues, and API resource transformation. This reduces boilerplate and accelerates development.
-2. **Eloquent ORM** — Clean, expressive database interaction with PostgreSQL via Eloquent models.
+2. **Eloquent ORM** — Clean, expressive database interaction with MySQL via Eloquent models. Future environments may use PostgreSQL or MariaDB if needed.
 3. **API Resources** — Laravel API Resources provide a clean transformation layer between database models and JSON responses.
 4. **Request Validation** — Form Requests provide centralized, reusable validation logic.
 5. **Queue System** — Laravel's queue system (backed by Redis via Horizon) will handle async analysis jobs without coupling them to the HTTP request lifecycle.
@@ -144,7 +145,7 @@ AnalysisService::analyse($code)
   └── Returns AnalysisResult DTO
       │
       ▼
-Analysis saved to PostgreSQL
+Analysis saved to MySQL
       │
       ▼
 AnalysisResource transforms result to JSON

@@ -28,7 +28,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 - Initialize Laravel 11 project in `backend/`
 - Configure environment (`.env`)
-- Connect to PostgreSQL database
+- Connect to MySQL database (via WampServer)
 - Set up Laravel Sanctum for SPA authentication
 - Verify database connectivity
 - Establish folder conventions (Services, DTOs, Resources)
@@ -78,7 +78,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 **Status:** ⬜ Not Started
 
 - Create `users` table migration (already exists via Laravel default)
-- Create `analyses` table migration:
+- Create `analyses` table migration (MySQL-compatible):
   - `id`, `user_id`, `code` (text), `language`, `time_complexity`, `space_complexity`, `explanation`, `status`, `created_at`, `updated_at`
 - Create `Analysis` Eloquent model
 - Define relationships: `User hasMany Analysis`
