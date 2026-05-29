@@ -179,3 +179,19 @@ Effect:  Creates the `analyses` table as defined in the migration file.
 ```
 
 This rule applies to both human contributors and AI-assisted development.
+
+---
+
+## 11. Frontend Component Size Rule
+
+Frontend UI components should stay below 100 lines whenever possible.
+
+If a component grows beyond 100 lines, split it into smaller focused components.
+
+Examples:
+- Page component should coordinate layout and data flow.
+- UI card component should only render one card.
+- Loading, error, and success states should be separate components when they grow.
+- Reusable buttons, badges, cards, panels, and layout sections should live in src/components.
+
+**Why:** Small components are easier to read, test, debug, reuse, and maintain.

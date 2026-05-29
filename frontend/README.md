@@ -1,71 +1,22 @@
-# CodeMind — Frontend
+# React + Vite
 
-This directory will contain the **React + Vite** frontend SPA for the CodeMind platform.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
----
+Currently, two official plugins are available:
 
-## Status
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-**Phase 0 — Not yet initialized.**
+## React Compiler
 
-The React project will be created here during **Phase 2** of the development roadmap.
-Do not add application files to this directory manually before that phase.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
----
+## Expanding the ESLint configuration
 
-## Planned Responsibilities
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
-The React frontend is the browser-based user interface for CodeMind.
+## Frontend Conventions
 
-| Responsibility | Details |
-|---|---|
-| **Code editor** | Monaco Editor for JavaScript input with syntax highlighting |
-| **API communication** | Axios client for all backend API requests |
-| **Authentication UI** | Login, registration, and protected route handling |
-| **Analysis display** | Complexity badges, logic explanation, results panel |
-| **History view** | Paginated list of past analysis submissions |
-| **Execution visualizer** | Step-by-step animated code trace (Phase 9) |
-
----
-
-## Planned Directory Structure (Post Phase 2)
-
-```
-frontend/
-├── public/
-├── src/
-│   ├── api/
-│   ├── components/
-│   ├── hooks/
-│   ├── pages/
-│   ├── routes/
-│   ├── store/
-│   └── main.jsx
-├── .env
-├── .env.example
-├── index.html
-├── package.json
-└── vite.config.js
-```
-
----
-
-## Initialization (Phase 2 Only)
-
-**Command (do not run yet — wait for Phase 2):**
-
-```
-Command: npm create vite@latest . -- --template react
-Purpose: Scaffolds a new React + Vite project in the current directory.
-Effect:  Creates index.html, src/, package.json, and vite.config.js.
-```
-
-All commands must be explained before being run. See [`../docs/DEVELOPMENT_RULES.md`](../docs/DEVELOPMENT_RULES.md) for the full rules.
-
----
-
-## Key References
-
-- [Architecture](../docs/ARCHITECTURE.md)
-- [Development Rules](../docs/DEVELOPMENT_RULES.md)
-- [Roadmap](../docs/ROADMAP.md)
+- Keep UI components under 100 lines where practical.
+- Split large pages into smaller components.
+- Prefer composition over large monolithic components.
