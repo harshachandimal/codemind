@@ -154,6 +154,20 @@ AnalysisResource transforms result to JSON
 React displays complexity + explanation
 ```
 
+*Note:* In future phases, the analyzer will detect recursive call patterns and produce structured recursion metadata.
+
+Example future metadata:
+```json
+{
+  "type": "recursion",
+  "function": "factorial",
+  "baseCase": "n === 0",
+  "recursiveCall": "factorial(n - 1)",
+  "estimatedDepth": "n",
+  "stackSpace": "O(n)"
+}
+```
+
 ---
 
 ## Security Considerations

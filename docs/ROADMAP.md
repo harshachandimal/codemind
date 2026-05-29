@@ -115,8 +115,10 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 - Use PHP regex/string analysis to detect common patterns:
   - Single loops → O(n)
   - Nested loops → O(n²)
-  - Recursive patterns → O(log n) or O(n log n)
   - No loops → O(1)
+- Detect simple recursive functions.
+- Identify base case and recursive call.
+- Estimate recursion-related time and space complexity.
 - Estimate space complexity from variable/array declarations
 - Integrate service into analysis endpoint
 - Write unit tests for the service
@@ -164,6 +166,8 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 - Implement `ExecutionTracerService` (static trace simulation, no actual execution)
 - Build step-by-step visualizer UI in React
 - Animate variable state changes, loop iterations, call stack
+- Visualize recursion call stack.
+- Show stack push, base case, return values, and stack unwinding.
 - Integrate with analysis results display
 
 **Deliverables:**

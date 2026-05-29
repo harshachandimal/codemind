@@ -18,8 +18,9 @@ CodeMind allows users to paste JavaScript code directly into a web editor and in
 
 - **Time Complexity** estimation (e.g., O(n), O(n²))
 - **Space Complexity** estimation
+- **Recursion Detection** to identify recursive functions and base cases
 - **Logic Explanation** in plain English
-- **Execution Step Visualization** (coming in later phases)
+- **Execution Step & Recursion Stack Visualization** (coming in later phases)
 
 The platform is designed to be fast, educational, and accessible — no local installation required.
 
