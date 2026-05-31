@@ -20,3 +20,6 @@ If you are developing a production application, we recommend using TypeScript wi
 - Keep UI components under 100 lines where practical.
 - Split large pages into smaller components.
 - Prefer composition over large monolithic components.
+- Auth API calls live in `src/services/authService.ts`.
+- Auth types live in `src/types/auth.ts`.
+- Route guards live in `src/routes`.

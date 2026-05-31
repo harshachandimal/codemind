@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,28 @@ Route::get('/health', function () {
             'database' => $dbStatus,
         ],
     );
+});
+
+/*
+|--------------------------------------------------------------------------
+| Auth Routes — Guest (No authentication required)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Auth Routes — Protected (auth:sanctum required)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
+    Route::get('/me',      [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 /*

@@ -60,12 +60,15 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 ## Phase 3 — Authentication
 **Status:** ⬜ Not Started
 
-- Implement user registration endpoint (`POST /api/register`)
-- Implement user login endpoint (`POST /api/login`)
-- Implement user logout endpoint (`POST /api/logout`)
-- Return Sanctum tokens on login
-- Implement React auth flow (login page, protected routes)
-- Store token in memory or httpOnly cookie
+- Install/configure Laravel Sanctum if needed.
+- Create register endpoint.
+- Create login endpoint.
+- Create current user endpoint.
+- Create logout endpoint.
+- Create React auth service.
+- Create login/register pages.
+- Add protected frontend routes.
+- Test auth flow.
 
 **Deliverables:**
 - Working registration and login

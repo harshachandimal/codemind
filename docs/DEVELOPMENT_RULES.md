@@ -195,3 +195,23 @@ Examples:
 - Reusable buttons, badges, cards, panels, and layout sections should live in src/components.
 
 **Why:** Small components are easier to read, test, debug, reuse, and maintain.
+
+---
+
+## 12. Authentication Rules
+
+- Never store plain-text passwords.
+- Always hash passwords using Laravel's hashing tools.
+- Never return password hashes in API responses.
+- Never expose authentication tokens in logs.
+- Protect authenticated routes using auth:sanctum.
+- Validate all auth requests using Form Requests.
+- Keep auth controllers thin.
+- Put auth business logic in service/action classes where practical.
+- Frontend should not hardcode secrets.
+- Frontend should attach the token only through the API client layer.
+- Auth controllers must stay thin.
+- Register/login validation must use Form Requests.
+- User output must use API Resources.
+- Auth use cases should be placed in Actions when practical.
+- Token creation should not be duplicated across controllers.

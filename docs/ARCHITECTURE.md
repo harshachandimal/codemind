@@ -58,6 +58,34 @@ The MVP uses a straightforward three-tier architecture:
 
 ---
 
+## Authentication Architecture
+
+Phase 3 uses **Laravel Sanctum** token-based API authentication.
+Cookie-based SPA authentication may be considered later, but token auth is used first for clarity.
+
+### Authentication Flow
+
+1. React Login Form
+   -> POST /api/auth/login
+   -> Laravel validates credentials
+   -> Laravel creates Sanctum token
+   -> React stores token
+   -> React sends Authorization: Bearer token
+   -> Protected API route responds
+
+### Auth Backend Structure
+
+Controller -> Form Request -> Action -> Service -> Resource -> ApiResponse
+
+- Controllers stay thin.
+- Form Requests validate input.
+- Actions coordinate use cases.
+- Services hold reusable auth business logic.
+- Resources format user data.
+- ApiResponse wraps final JSON response.
+
+---
+
 ## Future Architecture
 
 As the platform grows, the architecture will evolve to handle heavier analysis workloads and more sophisticated JavaScript parsing:
