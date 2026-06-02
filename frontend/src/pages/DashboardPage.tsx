@@ -53,22 +53,35 @@ const DashboardPage = () => {
                 Code Analysis Workspace
               </h2>
               <p className="text-sm text-white/40">
-                CodeMind workspace will appear here.
+                Ready to analyze your JavaScript code.
               </p>
             </div>
-            <StatusPill status="idle" label="Phase 4+" />
+            <StatusPill status="connected" label="Active" />
           </div>
 
-          {/* Empty state */}
           <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-white/[0.07] rounded-xl">
             <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center mb-4">
               <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
-            <p className="text-sm text-white/40 max-w-xs">
-              The code editor and analysis engine will be wired up in Phase 5.
+            <p className="text-sm text-white/40 max-w-xs mb-6">
+              Submit your JavaScript code to get instant complexity metrics and pattern detection.
             </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => navigate('/analyzer')}
+                className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm px-6 py-2 rounded-lg transition-colors"
+              >
+                Open Analyzer
+              </button>
+              <button
+                onClick={() => navigate('/history')}
+                className="bg-white/5 hover:bg-white/10 text-white font-medium text-sm px-6 py-2 rounded-lg transition-colors border border-white/10"
+              >
+                View History
+              </button>
+            </div>
           </div>
         </Panel>
       </main>

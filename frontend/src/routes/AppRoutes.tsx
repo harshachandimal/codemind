@@ -4,6 +4,8 @@ import HealthPage from '../pages/HealthPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
+import AnalyzerPage from '../pages/AnalyzerPage';
+import HistoryPage from '../pages/HistoryPage';
 import ProtectedRoute from './ProtectedRoute';
 
 const AppRoutes = () => {
@@ -18,6 +20,8 @@ const AppRoutes = () => {
         {/* Protected routes — require auth:sanctum token */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/analyzer" element={<AnalyzerPage />} />
+          <Route path="/history" element={<HistoryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

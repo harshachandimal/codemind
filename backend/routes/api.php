@@ -5,6 +5,7 @@ use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Analysis\AnalysisController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,7 +66,14 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::get('/analyses', [AnalysisController::class, 'index']);
+    Route::post('/analyses', [AnalysisController::class, 'store']);
+    Route::get('/analyses/{analysis}', [AnalysisController::class, 'show']);
+    Route::delete('/analyses/{analysis}', [AnalysisController::class, 'destroy']);
+});
 
