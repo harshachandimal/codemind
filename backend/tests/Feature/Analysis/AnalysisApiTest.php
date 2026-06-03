@@ -28,33 +28,34 @@ class AnalysisApiTest extends TestCase
         Sanctum::actingAs($user);
 
         $payload = [
-            'title' => 'Sum array function',
-            'language' => 'javascript',
+            'title'       => 'Sum array function',
+            'language'    => 'javascript',
             'source_code' => 'function sum(arr) { return arr.length; }',
         ];
 
         $response = $this->postJson('/api/analyses', $payload);
 
+        // source_code has no loops or recursion → real analyzer returns O(1)
         $response->assertStatus(201)
             ->assertJson([
                 'success' => true,
                 'message' => 'Analysis created successfully.',
-                'data' => [
+                'data'    => [
                     'analysis' => [
-                        'title' => 'Sum array function',
-                        'language' => 'javascript',
-                        'status' => 'completed',
-                        'time_complexity' => 'O(n)',
+                        'title'            => 'Sum array function',
+                        'language'         => 'javascript',
+                        'status'           => 'completed',
+                        'time_complexity'  => 'O(1)',
                         'space_complexity' => 'O(1)',
                     ]
                 ]
             ]);
 
-        $this->assertContains('stubbed_analysis', $response->json('data.analysis.detected_patterns'));
+        $this->assertContains('constant_operations', $response->json('data.analysis.detected_patterns'));
 
         $this->assertDatabaseHas('analyses', [
-            'user_id' => $user->id,
-            'title' => 'Sum array function',
+            'user_id'  => $user->id,
+            'title'    => 'Sum array function',
             'language' => 'javascript',
         ]);
     }
