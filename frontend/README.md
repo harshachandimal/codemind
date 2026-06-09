@@ -23,3 +23,6 @@ If you are developing a production application, we recommend using TypeScript wi
 - Auth API calls live in `src/services/authService.ts`.
 - Auth types live in `src/types/auth.ts`.
 - Route guards live in `src/routes`.
+- Runtime trace visualizer components will live under `src/components/trace`.
+- Runtime trace types will live under `src/types/trace.ts`.
+- Trace UI must clearly distinguish actual trace data from estimated complexity analysis.

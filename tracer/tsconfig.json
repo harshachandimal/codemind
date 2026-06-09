@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    /* Target */
+    "target": "ES2022",
+
+    /* Module — Node16 CJS output (non-deprecated, forward-compatible) */
+    "module": "Node16",
+    "moduleResolution": "Node16",
+
+    /* Paths */
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* Strict type checking */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    /* Interop */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /* Output */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    /* Diagnostics */
+    "noEmitOnError": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -70,3 +70,10 @@ coverage/
 
 # Docker override files (keep docker-compose.yml, ignore local overrides)
 docker-compose.override.yml
+
+# ─── Tracer service (tracer/) ──────────────────────────────────────────────────
+# Scoped rules ensure tracer/src and tracer/package.json remain tracked.
+tracer/node_modules/
+tracer/dist/
+tracer/.env
+tracer/.env.*

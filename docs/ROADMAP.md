@@ -146,7 +146,33 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 8 — Analysis History
+## Phase 8 — Runtime Trace Service Foundation
+**Status:** ⬜ Not Started
+
+- document tracer safety model
+- create tracer/ Node.js service
+- create trace request/response contract
+- add sandbox restrictions
+- support simple JS function tracing
+- add timeout and max step limits
+- connect Laravel to tracer service
+- add backend tests
+
+---
+
+## Phase 9 — Runtime Trace Visualizer
+**Status:** ⬜ Not Started
+
+- create trace types
+- create execution timeline
+- create variable state panel
+- create call stack panel
+- add playback controls
+- integrate trace UI into AnalyzerPage
+
+---
+
+## Phase 10 — Analysis History
 **Status:** ⬜ Not Started
 
 - Build history list page in React
@@ -162,7 +188,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 9 — Execution Visualizer
+## Phase 11 — Execution Visualizer
 **Status:** ⬜ Not Started
 
 - Design execution trace data structure
@@ -178,7 +204,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 10 — Queue Processing
+## Phase 12 — Queue Processing
 **Status:** ⬜ Not Started
 
 - Install and configure Redis
@@ -194,7 +220,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 11 — AI Explanations
+## Phase 13 — AI Explanations
 **Status:** ⬜ Not Started
 
 - Integrate OpenAI API (or similar) for natural-language code explanation
@@ -209,7 +235,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 12 — Node.js Analysis Microservice
+## Phase 14 — Node.js Analysis Microservice
 **Status:** ⬜ Not Started
 
 - Initialize Node.js service in `services/analyser/`
@@ -226,7 +252,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 13 — Testing
+## Phase 15 — Testing
 **Status:** ⬜ Not Started
 
 - Write comprehensive unit tests for all Services
@@ -241,7 +267,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 14 — Docker Deployment
+## Phase 16 — Docker Deployment
 **Status:** ⬜ Not Started
 
 - Write `Dockerfile` for Laravel backend
@@ -257,7 +283,7 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 
 ---
 
-## Phase 15 — Production Hardening
+## Phase 17 — Production Hardening
 **Status:** ⬜ Not Started
 
 - Set up SSL/TLS (Let's Encrypt or managed cert)

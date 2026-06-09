@@ -204,3 +204,29 @@ Example future metadata:
 - **Input validation:** All code submissions are validated for size limits and content type before processing.
 - **Rate limiting:** API endpoints are rate-limited to prevent abuse.
 - **Authentication:** All analysis endpoints (except possibly a public demo) require authentication via Sanctum tokens.
+
+---
+
+## Real Runtime Trace Architecture
+
+In the future, CodeMind will support real runtime execution tracing to provide accurate line-by-line execution visualizations. 
+
+**Why runtime tracing must be isolated:**
+Executing user-submitted code is inherently dangerous. It must be completely isolated from the main backend (Laravel) to prevent remote code execution (RCE) vulnerabilities, filesystem access, or network abuse. 
+
+**Architecture Flow:**
+1. **React Frontend** -> requests execution trace
+2. **Laravel API** -> orchestrates the request, validates input, but does not execute the code
+3. **Node.js Tracer Service** -> a separate, sandboxed service that receives the code
+4. **Sandbox execution** -> the Tracer Service executes the code in a heavily restricted environment
+5. **Trace steps returned** -> the Tracer Service returns line-by-line step data
+6. **Laravel stores/returns trace** -> Laravel receives the trace and returns it to the client
+7. **React visualizes trace** -> the frontend visualizer renders the actual execution timeline
+
+**Safety Boundaries and Limitations:**
+- Laravel acts only as an orchestrator; it must never execute user code directly.
+- The Node.js Tracer Service handles all execution inside a sandbox.
+- **Strict Sandbox Rules:** No filesystem access, no network access, no require/import access, and no DOM/browser APIs.
+- **Resource Limits:** Strict timeout limits, memory limits, and maximum step counts are enforced to prevent infinite loops and denial-of-service (DoS).
+- **Untrusted Code:** All source code is treated as untrusted. The tracer returns only safe, structured trace data.
+- **Error Handling:** Internal errors or stack traces from the tracer are never exposed to the frontend.

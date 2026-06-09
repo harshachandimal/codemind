@@ -1,0 +1,24 @@
+/**
+ * Central safety limits for the CodeMind tracer service.
+ *
+ * These constants will be enforced by the sandbox runner in a future
+ * implementation step. They are defined here as the single source of
+ * truth so they can be referenced from any part of the tracer service
+ * without duplication.
+ *
+ * SAFETY NOTE: Never relax these limits without a formal security review.
+ */
+
+export const TRACE_LIMITS = {
+  /** Maximum wall-clock time (ms) a trace run is allowed to take. */
+  timeoutMs: 1000,
+
+  /** Maximum number of trace steps before the run is force-terminated. */
+  maxSteps: 200,
+
+  /** Maximum length (characters) of accepted source code strings. */
+  maxSourceLength: 20_000,
+
+  /** Maximum size (bytes) of accumulated trace output. */
+  maxOutputBytes: 100_000,
+} as const;

@@ -215,3 +215,15 @@ Examples:
 - User output must use API Resources.
 - Auth use cases should be placed in Actions when practical.
 - Token creation should not be duplicated across controllers.
+
+---
+
+## 13. Runtime Trace Safety Rules
+
+- Never execute user code in Laravel.
+- Never execute unsandboxed code.
+- Tracer must block filesystem, network, imports, and dangerous globals.
+- Every trace request must have timeout and step limit.
+- Tracer output must be structured and sanitized.
+- Frontend must clearly label real trace vs estimated complexity.
+- Any runtime trace feature must have tests for infinite loops and blocked APIs.
