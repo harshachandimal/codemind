@@ -157,6 +157,17 @@ Each phase has a clear, focused goal. A phase is only started when the previous 
 - add timeout and max step limits
 - connect Laravel to tracer service
 - add backend tests
+- 8.11 Design safe execution MVP
+- 8.12 Add interpreter type contracts
+- 8.13 Build execution environment and variable store
+- 8.14 Interpret function declaration and return statements
+- 8.15 Interpret variable declarations and assignments
+- 8.16 Interpret simple for loops with max iteration limit
+- 8.17 Generate real TraceStep output
+- 8.18 Add interpreter tests
+- 8.19 Enable execution only behind execution gate
+- 8.20 Verify tracer real execution MVP
+- 8.21 Commit safe execution MVP
 
 ---
 

@@ -230,3 +230,20 @@ Executing user-submitted code is inherently dangerous. It must be completely iso
 - **Resource Limits:** Strict timeout limits, memory limits, and maximum step counts are enforced to prevent infinite loops and denial-of-service (DoS).
 - **Untrusted Code:** All source code is treated as untrusted. The tracer returns only safe, structured trace data.
 - **Error Handling:** Internal errors or stack traces from the tracer are never exposed to the frontend.
+
+---
+
+## Safe Runtime Execution MVP
+
+The first runtime trace MVP uses an **AST interpretation** strategy rather than direct JavaScript execution.
+
+**Why AST Interpretation?**
+Executing user code securely in a Node.js process requires a sophisticated sandbox (e.g., using `isolated-vm` or heavy child process restrictions) to prevent breakouts. To deliver tracing capabilities safely and quickly, the MVP avoids execution entirely. Instead, it walks the parsed AST and interprets a limited, safe subset of JavaScript.
+
+**Key characteristics of the MVP:**
+- It interprets only an explicitly supported subset of syntax (basic math, variables, simple `for` loops, `if` statements).
+- Unsupported syntax fails safely with a structured error — it does not crash the service.
+- Strict runtime limits (`maxSteps`, `timeoutMs`, `maxLoopIterations`) prevent runaway traces.
+- Recursion and `while` loops are deferred until basic tracing is stable.
+- The Laravel backend remains purely an orchestrator and does not execute code.
+- The tracer service remains fully isolated and disabled by default.

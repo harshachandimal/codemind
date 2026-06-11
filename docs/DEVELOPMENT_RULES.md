@@ -227,3 +227,18 @@ Examples:
 - Tracer output must be structured and sanitized.
 - Frontend must clearly label real trace vs estimated complexity.
 - Any runtime trace feature must have tests for infinite loops and blocked APIs.
+
+---
+
+## 14. Runtime Interpreter Rules
+
+- The first runtime trace must use an AST interpreter, not `eval()`, `vm`, or the `Function` constructor.
+- Every supported AST node must be explicitly implemented.
+- Unsupported AST nodes must fail safely with a structured error.
+- Every interpreter feature must have tests.
+- Variable snapshots must be sanitized.
+- Step count must be enforced strictly.
+- Loop iteration limits must be enforced strictly.
+- Call depth limits must be enforced before recursion is supported.
+- Do not enable runtime execution by default; it must remain disabled unless explicitly configured.
+- Do not claim unsupported code is traced; it must fail fast.

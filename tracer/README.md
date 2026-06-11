@@ -84,9 +84,7 @@ Returns service readiness. `executionEnabled` is `false` until sandbox execution
 
 ### `POST /trace`
 
-Accepts a `TraceRequest` JSON body and returns a `TraceResult` JSON response.
-
-> **Important:** At this stage, `/trace` validates the request and returns a safe placeholder response. It does **not** execute code.
+Accepts a `TraceRequest` JSON body and returns a `TraceApiResponse` JSON response.
 
 **Request body (`TraceRequest`):**
 ```json
@@ -106,7 +104,41 @@ Accepts a `TraceRequest` JSON body and returns a `TraceResult` JSON response.
 | `entryFunction` | Optional string. Must match `/^[A-Za-z_$][A-Za-z0-9_$]*$/`. |
 | `input` | Optional array. Max 10 arguments. |
 
-**Response (`TraceResult`):** Always HTTP 200 with a typed JSON payload. Errors are encoded in `success: false` and `steps`, never as HTTP 4xx/5xx status codes.
+## Trace API Response Contract
+
+The tracer service returns a highly structured `TraceApiResponse` to the Laravel backend. To maintain absolute safety:
+- **No source code is ever included in the response.**
+- **No raw stack traces or internal errors are exposed.**
+- The `success` boolean strictly means the code actually executed without failure.
+
+The response operates in three modes:
+
+### 1. Planned Mode
+When `TRACER_EXECUTION_ENABLED` is false (default), the tracer validates, parses, and generates a static observation plan, but stops before execution.
+- `success`: false
+- `mode`: "planned"
+- `trace.steps`: []
+- `trace.summary.terminatedReason`: "not_executed"
+- `plan`: includes the static `TracePlan`
+
+### 2. Executed Mode
+When `TRACER_EXECUTION_ENABLED` is true and the code runs successfully through the AST interpreter.
+- `success`: true
+- `mode`: "executed"
+- `trace.steps`: populated with recorded runtime steps
+- `trace.summary.terminatedReason`: "completed" (or timeout/max_steps)
+- `result.returnedValue`: contains the final returned value
+
+### 3. Error Mode
+When validation, preflight, parsing, or execution fails.
+- `success`: false
+- `mode`: "error"
+- `error.code`: A stable error code (e.g., `VALIDATION_ERROR`, `SAFETY_ERROR`, `PARSE_ERROR`, `UNSUPPORTED_SYNTAX`, `INTERPRETER_ERROR`)
+- `error.message`: Safe, human-readable error description
+- `trace.steps`: []
+
+**Response format example (`TraceApiResponse`):** Always HTTP 200 with a typed JSON payload. Errors are encoded within the JSON payload, never as HTTP 4xx/5xx status codes.
+
 
 ---
 
@@ -157,8 +189,43 @@ npm run typecheck  # Type-check without emitting files
 | 8.7   | Safe AST parsing foundation               | ✅ Complete  |
 | 8.8   | Trace plan generator                      | ✅ Complete  |
 | 8.9   | Runtime execution design gate             | ✅ Complete  |
-| 8.10  | Sandboxed execution implementation        | 🔲 Future    |
-| 8.11  | Laravel → Tracer HTTP integration         | 🔲 Future    |
+| 8.10  | Commit tracer foundation safely           | ✅ Complete  |
+| 8.11  | Design safe execution MVP                 | ✅ Complete  |
+| 8.12  | Add interpreter type contracts            | 🔲 Future    |
+| 8.13  | Build execution env & variable store      | 🔲 Future    |
+| 8.14  | Interpret functions & returns             | 🔲 Future    |
+| 8.15  | Interpret variables & assignments         | 🔲 Future    |
+| 8.16  | Interpret simple for loops                | 🔲 Future    |
+| 8.17  | Generate real TraceStep output            | 🔲 Future    |
+| 8.18  | Add interpreter tests                     | 🔲 Future    |
+| 8.19  | Enable execution behind execution gate    | 🔲 Future    |
+| 8.20  | Verify tracer real execution MVP          | 🔲 Future    |
+| 8.21  | Commit safe execution MVP                 | 🔲 Future    |
+
+## Safe Execution MVP Plan
+
+The first runtime tracer implementation uses an **AST interpreter** rather than directly executing JavaScript (e.g. via `eval` or `vm`).
+
+**Supported MVP syntax:**
+- `FunctionDeclaration`, `BlockStatement`, `ReturnStatement`
+- `VariableDeclaration`, `VariableDeclarator`, `Identifier`
+- `NumericLiteral`, `StringLiteral`, `BooleanLiteral`, `ArrayExpression`
+- Basic `BinaryExpression`: `+`, `-`, `*`, `/`, `%`, `<`, `<=`, `>`, `>=`, `===`, `!==`
+- Simple `AssignmentExpression` and `UpdateExpression` (`i++`, `i--`)
+- `ForStatement` (simple numeric counters), `IfStatement`
+- `MemberExpression` for array indexing
+- `CallExpression` (only for calling the entry function)
+
+**Unsupported MVP syntax (fails safely):**
+- imports, `require`
+- async/await, Promise, fetch, DOM APIs
+- classes, `this`, `new`, closures, object methods
+- `try/catch`, generators, spread/rest, destructuring
+- recursion and `while` loops (deferred until step limits are robust)
+
+**Safety Limits:**
+- Enforced: `maxSteps`, `timeoutMs`, `maxSourceLength`, `maxOutputBytes`, `maxLoopIterations`, `maxCallDepth`, `maxArrayLength`
+- The execution gate (`TRACER_EXECUTION_ENABLED`) remains disabled by default. No real execution is implemented yet.
 
 ## Runtime Execution Gate
 

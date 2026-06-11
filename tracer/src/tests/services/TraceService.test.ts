@@ -4,7 +4,7 @@ import { TraceService } from '../../services/TraceService.js';
 describe('TraceService', () => {
   const service = new TraceService();
 
-  it('returns_placeholder_for_valid_safe_request', () => {
+  it('default_valid_request_returns_planned_mode', () => {
     const validRequest = {
       language: 'javascript',
       sourceCode: 'function add(a, b) { return a + b; }',
@@ -14,23 +14,19 @@ describe('TraceService', () => {
 
     const result = service.trace(validRequest);
 
-    expect(result.success).toBe(false); // execution not yet implemented
-    expect(result.steps.length).toBeGreaterThan(0);
-
-    const step = result.steps[0];
-    expect(step?.description).toContain('Runtime tracing is not implemented yet');
-    expect(step?.description).toContain('trace planning succeeded');
-    expect(step?.description).toContain('Runtime execution is currently disabled');
-
-    // Plan metadata and gate state in variables
-    expect(step?.variables['plannedSteps']).toBeGreaterThan(0);
-    expect(step?.variables['supported']).toBe(true);
-    expect(step?.variables['executionEnabled']).toBe(false);
-
-    expect(result.summary.terminatedReason).toBe('error');
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('planned');
+    expect(result.executionEnabled).toBe(false);
+    expect(result.plan).not.toBeNull();
+    expect(result.result).toBeNull();
+    expect(result.error).toBeNull();
+    expect(result.metadata.language).toBe('javascript');
+    expect((result as any).sourceCode).toBeUndefined();
+    expect(result.trace.steps).toEqual([]);
+    expect(result.trace.summary.terminatedReason).toBe('not_executed');
   });
 
-  it('returns_safe_error_for_invalid_request', () => {
+  it('invalid_language_returns_error_contract', () => {
     const invalidRequest = {
       language: 'python',
       sourceCode: 'print("hi")',
@@ -39,11 +35,28 @@ describe('TraceService', () => {
     const result = service.trace(invalidRequest);
 
     expect(result.success).toBe(false);
-    expect(result.steps[0]?.type).toBe('error');
-    expect(result.steps[0]?.description).toContain('Invalid trace request');
+    expect(result.mode).toBe('error');
+    expect(result.error?.code).toBe('VALIDATION_ERROR');
+    expect(result.error?.message).toContain('Invalid trace request');
+    expect(JSON.stringify(result)).not.toContain('print("hi")'); // No source code
   });
 
-  it('returns_safe_error_for_preflight_blocked_code', () => {
+  it('unsupported_syntax_returns_error_contract', () => {
+    const badSyntaxRequest = {
+      language: 'javascript',
+      sourceCode: 'class User {}',
+      entryFunction: 'User',
+    };
+
+    const result = service.trace(badSyntaxRequest);
+
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('error');
+    expect(result.error?.code).toBe('UNSUPPORTED_SYNTAX');
+    expect(JSON.stringify(result)).not.toContain('class User');
+  });
+
+  it('preflight_blocked_code_returns_error_contract', () => {
     const dangerousRequest = {
       language: 'javascript',
       sourceCode: "function bad() { eval('2 + 2'); }",
@@ -53,26 +66,8 @@ describe('TraceService', () => {
     const result = service.trace(dangerousRequest);
 
     expect(result.success).toBe(false);
-    expect(result.steps[0]?.type).toBe('error');
-    expect(result.steps[0]?.description).toContain('safety preflight');
-    expect(result.steps[0]?.description).toContain('eval');
-  });
-
-  it('returns_safe_error_for_unparseable_source', () => {
-    const badSyntaxRequest = {
-      language: 'javascript',
-      sourceCode: 'function broken( {',
-      entryFunction: 'broken',
-    };
-
-    const result = service.trace(badSyntaxRequest);
-
-    expect(result.success).toBe(false);
-    expect(result.steps[0]?.type).toBe('error');
-    expect(result.steps[0]?.description).toBe(
-      'JavaScript source could not be parsed.',
-    );
-    // No raw source code should appear anywhere in the result
-    expect(JSON.stringify(result)).not.toContain('function broken');
+    expect(result.mode).toBe('error');
+    expect(result.error?.code).toBe('SAFETY_ERROR');
+    expect(result.error?.message).toContain('safety preflight');
   });
 });

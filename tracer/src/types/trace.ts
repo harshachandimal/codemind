@@ -13,8 +13,13 @@ export type TraceStepType =
   | 'function_call'
   | 'variable_declaration'
   | 'assignment'
+  | 'loop_start'
   | 'loop_iteration'
+  | 'loop_exit'
+  | 'loop_tracking'
   | 'condition'
+  | 'branch'
+  | 'array_read'
   | 'return'
   | 'error';
 
@@ -43,7 +48,7 @@ export type TraceSummary = {
   /** Total number of steps recorded before termination. */
   totalSteps: number;
   /** Reason the trace run ended. */
-  terminatedReason: 'completed' | 'timeout' | 'max_steps' | 'error';
+  terminatedReason: 'completed' | 'timeout' | 'max_steps' | 'error' | 'not_executed';
 };
 
 /**

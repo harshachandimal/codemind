@@ -21,4 +21,13 @@ export const TRACE_LIMITS = {
 
   /** Maximum size (bytes) of accumulated trace output. */
   maxOutputBytes: 100_000,
+
+  /** Maximum iterations allowed in a single loop. */
+  maxLoopIterations: 100,
+
+  /** Maximum depth of function call stack before force-terminating. */
+  maxCallDepth: 20,
+
+  /** Maximum elements allowed in a tracked array structure. */
+  maxArrayLength: 1000,
 } as const;

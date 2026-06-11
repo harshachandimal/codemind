@@ -36,6 +36,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * Checks if a value is a safely allowed runtime primitive or array of them.
+ */
+function isSafeInputValue(val: unknown, currentDepth = 0, maxDepth = 5): boolean {
+  if (currentDepth > maxDepth) return false;
+  
+  if (val === null || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+    return true;
+  }
+  
+  if (Array.isArray(val)) {
+    return val.every((item) => isSafeInputValue(item, currentDepth + 1, maxDepth));
+  }
+  
+  return false;
+}
+
+/**
  * Appends a validation message to the details map for a given field.
  */
 function addError(
@@ -118,6 +135,12 @@ export function validateTraceRequest(value: unknown): TraceRequest {
         details,
         'input',
         `Input must not exceed ${MAX_INPUT_ARGS} arguments.`,
+      );
+    } else if (!isSafeInputValue(input)) {
+      addError(
+        details,
+        'input',
+        'Input arguments must be strings, numbers, booleans, null, or arrays of these. Objects are not supported.',
       );
     }
   }
