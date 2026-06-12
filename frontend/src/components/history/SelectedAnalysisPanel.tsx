@@ -4,6 +4,8 @@ import Panel from '../common/Panel';
 import ComplexityMetric from '../analyzer/ComplexityMetric';
 import PatternBadgeList from '../analyzer/PatternBadgeList';
 import DeleteAnalysisButton from './DeleteAnalysisButton';
+import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
+import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
 
 type Props = {
   analysis: Analysis | null;
@@ -48,6 +50,10 @@ const SelectedAnalysisPanel: React.FC<Props> = ({ analysis, deleting, onDelete }
           </div>
         </div>
       )}
+
+      <RuntimeTraceSummaryPanel analysis={analysis} />
+
+      <RuntimeTraceTimeline analysis={analysis} />
 
       <div>
         <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-2">Source Code Snippet</h3>

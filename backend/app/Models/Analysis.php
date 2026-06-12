@@ -21,6 +21,13 @@ class Analysis extends Model
         'space_complexity',
         'detected_patterns',
         'explanation',
+        'trace_mode',
+        'trace_steps',
+        'trace_summary',
+        'trace_result',
+        'trace_plan',
+        'trace_error',
+        'trace_metadata',
     ];
 
     protected function casts(): array
@@ -28,6 +35,12 @@ class Analysis extends Model
         return [
             'status' => AnalysisStatus::class,
             'detected_patterns' => 'array',
+            'trace_steps' => 'array',
+            'trace_summary' => 'array',
+            'trace_result' => 'array',
+            'trace_plan' => 'array',
+            'trace_error' => 'array',
+            'trace_metadata' => 'array',
         ];
     }
 

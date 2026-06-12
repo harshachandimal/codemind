@@ -5,6 +5,8 @@ import AnalyzerEmptyState from './AnalyzerEmptyState';
 import AnalysisStaticNote from './AnalysisStaticNote';
 import ComplexityLensPanel from '../visualizer/ComplexityLensPanel';
 import RecursionStackPreview from '../visualizer/RecursionStackPreview';
+import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
+import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
 
 type Props = { analysis: Analysis | null };
 
@@ -53,6 +55,12 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis }) => {
           </div>
         </div>
       )}
+
+      {/* Runtime Trace Summary */}
+      <RuntimeTraceSummaryPanel analysis={analysis} />
+
+      {/* Step-by-step execution timeline */}
+      <RuntimeTraceTimeline analysis={analysis} />
 
       <AnalysisStaticNote />
     </div>

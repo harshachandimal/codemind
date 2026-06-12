@@ -170,4 +170,155 @@ class AnalysisApiTest extends TestCase
             'id' => $analysis->id,
         ]);
     }
+
+    public function test_analysis_response_includes_runtime_trace_fields()
+    {
+        $user = User::factory()->create();
+        $analysis = Analysis::factory()->withExecutedTrace()->create(['user_id' => $user->id]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson("/api/analyses/{$analysis->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.analysis.id', $analysis->id)
+            ->assertJsonPath('data.analysis.trace_mode', 'executed')
+            ->assertJsonPath('data.analysis.trace_steps.0.step', 1)
+            ->assertJsonPath('data.analysis.trace_summary.totalSteps', 2)
+            ->assertJsonPath('data.analysis.trace_result.returnedValue', 5)
+            ->assertJsonPath('data.analysis.trace_metadata.language', 'javascript');
+    }
+    public function test_analysis_creation_stores_disabled_trace_when_tracer_disabled()
+    {
+        config(['tracer.enabled' => false]);
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Sum array function',
+            'language'    => 'javascript',
+            'source_code' => 'function sum(arr) { return arr.length; }',
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'planned')
+            ->assertJsonPath('data.analysis.trace_steps', [])
+            ->assertJsonPath('data.analysis.trace_summary.totalSteps', 0)
+            ->assertJsonPath('data.analysis.trace_summary.terminatedReason', 'not_executed')
+            ->assertJsonPath('data.analysis.trace_result', null)
+            ->assertJsonPath('data.analysis.trace_error', null);
+            
+        \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+
+    public function test_analysis_creation_calls_tracer_when_enabled()
+    {
+        config(['tracer.enabled' => true]);
+        config(['tracer.service_url' => 'http://tracer.test']);
+        
+        \Illuminate\Support\Facades\Http::fake([
+            'http://tracer.test/trace' => \Illuminate\Support\Facades\Http::response([
+                "success" => true,
+                "executionEnabled" => true,
+                "mode" => "executed",
+                "message" => "Trace executed successfully.",
+                "trace" => [
+                    "steps" => [
+                        [
+                            "step" => 1,
+                            "line" => 1,
+                            "type" => "function_call",
+                            "description" => "Function add was called.",
+                            "variables" => [],
+                            "callStack" => ["add"]
+                        ],
+                        [
+                            "step" => 2,
+                            "line" => 2,
+                            "type" => "return",
+                            "description" => "Function add returned 5.",
+                            "variables" => [],
+                            "callStack" => ["add"]
+                        ]
+                    ],
+                    "summary" => [
+                        "totalSteps" => 2,
+                        "terminatedReason" => "completed"
+                    ]
+                ],
+                "result" => [
+                    "returnedValue" => 5
+                ],
+                "plan" => null,
+                "error" => null,
+                "metadata" => [
+                    "language" => "javascript",
+                    "entryFunction" => "add",
+                    "analyzedAt" => "2026-06-11T00:00:00.000Z"
+                ]
+            ], 200)
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Add function',
+            'language'    => 'javascript',
+            'source_code' => 'function add(a, b) { return a + b; }',
+            'entryFunction' => 'add',
+            'input' => [2, 3]
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'executed')
+            ->assertJsonPath('data.analysis.trace_result.returnedValue', 5)
+            ->assertJsonPath('data.analysis.trace_summary.totalSteps', 2);
+            
+        $this->assertCount(2, $response->json('data.analysis.trace_steps'));
+
+        \Illuminate\Support\Facades\Http::assertSent(function ($request) {
+            return $request->url() == 'http://tracer.test/trace' &&
+                   $request['language'] == 'javascript' &&
+                   $request['sourceCode'] == 'function add(a, b) { return a + b; }' &&
+                   $request['entryFunction'] == 'add' &&
+                   $request['input'] == [2, 3];
+        });
+    }
+
+    public function test_analysis_creation_still_succeeds_when_tracer_unavailable()
+    {
+        config(['tracer.enabled' => true]);
+        config(['tracer.service_url' => 'http://tracer.test']);
+        
+        \Illuminate\Support\Facades\Http::fake([
+            'http://tracer.test/trace' => function () {
+                throw new \Illuminate\Http\Client\ConnectionException("Connection failed");
+            }
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Add function',
+            'language'    => 'javascript',
+            'source_code' => 'function add(a, b) { return a + b; }',
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        // Analysis succeeds despite tracer failure
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'error')
+            ->assertJsonPath('data.analysis.trace_error.code', 'TRACER_UNAVAILABLE')
+            ->assertJsonPath('data.analysis.time_complexity', 'O(1)'); // From standard analyzer
+            
+        // Assert no raw exceptions in the response message
+        $this->assertStringNotContainsString('Connection failed', $response->json('message'));
+    }
 }

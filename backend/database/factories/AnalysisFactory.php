@@ -23,6 +23,13 @@ class AnalysisFactory extends Factory
             'space_complexity' => 'O(1)',
             'detected_patterns' => ['single_loop', 'array_traversal'],
             'explanation' => 'This function iterates through the array once and keeps a constant amount of extra memory.',
+            'trace_mode' => null,
+            'trace_steps' => null,
+            'trace_summary' => null,
+            'trace_result' => null,
+            'trace_plan' => null,
+            'trace_error' => null,
+            'trace_metadata' => null,
         ];
     }
 
@@ -66,6 +73,44 @@ class AnalysisFactory extends Factory
             'space_complexity' => 'O(1)',
             'detected_patterns' => ['nested_loop'],
             'explanation' => 'The nested loops cause the function to process every pair of array elements.',
+        ]);
+    }
+
+    public function withExecutedTrace(): static
+    {
+        return $this->state(fn () => [
+            'trace_mode' => 'executed',
+            'trace_steps' => [
+                [
+                    'step' => 1,
+                    'line' => 1,
+                    'type' => 'function_call',
+                    'description' => 'Function add was called.',
+                    'variables' => [],
+                    'callStack' => ['add'],
+                ],
+                [
+                    'step' => 2,
+                    'line' => 2,
+                    'type' => 'return',
+                    'description' => 'Function add returned 5.',
+                    'variables' => [],
+                    'callStack' => ['add'],
+                ],
+            ],
+            'trace_summary' => [
+                'totalSteps' => 2,
+                'terminatedReason' => 'completed',
+            ],
+            'trace_result' => [
+                'returnedValue' => 5,
+            ],
+            'trace_plan' => null,
+            'trace_error' => null,
+            'trace_metadata' => [
+                'language' => 'javascript',
+                'entryFunction' => 'add',
+            ],
         ]);
     }
 }

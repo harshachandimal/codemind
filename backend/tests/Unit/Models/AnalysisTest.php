@@ -96,4 +96,16 @@ class AnalysisTest extends TestCase
         $this->assertEquals('O(n²)', $analysis->time_complexity);
         $this->assertContains('nested_loop', $analysis->detected_patterns);
     }
+
+    public function test_analysis_casts_runtime_trace_fields_to_arrays(): void
+    {
+        $analysis = Analysis::factory()->withExecutedTrace()->create();
+
+        $this->assertIsArray($analysis->trace_steps);
+        $this->assertIsArray($analysis->trace_summary);
+        $this->assertIsArray($analysis->trace_result);
+        $this->assertNull($analysis->trace_plan);
+        $this->assertNull($analysis->trace_error);
+        $this->assertIsArray($analysis->trace_metadata);
+    }
 }
