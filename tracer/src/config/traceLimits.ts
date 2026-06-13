@@ -14,7 +14,7 @@ export const TRACE_LIMITS = {
   timeoutMs: 1000,
 
   /** Maximum number of trace steps before the run is force-terminated. */
-  maxSteps: 200,
+  maxSteps: 500,
 
   /** Maximum length (characters) of accepted source code strings. */
   maxSourceLength: 20_000,

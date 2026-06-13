@@ -1,4 +1,4 @@
-import type { Statement, ReturnStatement, VariableDeclaration, ExpressionStatement, ForStatement, IfStatement, AssignmentExpression, UpdateExpression } from '@babel/types';
+import type { Statement, ReturnStatement, VariableDeclaration, ExpressionStatement, ForStatement, IfStatement, AssignmentExpression, UpdateExpression, WhileStatement } from '@babel/types';
 import { TraceInterpreterError } from '../../errors/TraceInterpreterError.js';
 import type { InterpreterEnvironment } from '../InterpreterEnvironment.js';
 import type { RuntimeValue } from '../../types/interpreter.js';
@@ -7,6 +7,7 @@ import { executeAssignmentExpression } from './executeAssignmentExpression.js';
 import { executeUpdateExpression } from './executeUpdateExpression.js';
 import { executeForStatement } from './executeForStatement.js';
 import { executeIfStatement } from './executeIfStatement.js';
+import { executeWhileStatement } from './executeWhileStatement.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { formatRuntimeValue } from '../utils/formatRuntimeValue.js';
 import { getNodeLine } from '../core/getNodeLine.js';
@@ -58,6 +59,10 @@ export function interpretStatement(
 
   if (stmt.type === 'IfStatement') {
     return executeIfStatement(stmt as IfStatement, env, fnName);
+  }
+
+  if (stmt.type === 'WhileStatement') {
+    return executeWhileStatement(stmt as WhileStatement, env, fnName);
   }
 
   throw new TraceInterpreterError(

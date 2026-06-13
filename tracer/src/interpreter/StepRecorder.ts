@@ -2,7 +2,7 @@ import { TRACE_LIMITS } from '../config/traceLimits.js';
 import { TraceInterpreterError } from '../errors/TraceInterpreterError.js';
 import { snapshotVariables } from './snapshotVariables.js';
 import type { TraceStep, TraceStepType } from '../types/trace.js';
-import type { InterpreterState } from '../types/interpreter.js';
+import type { InterpreterState, VariableStore } from '../types/interpreter.js';
 
 /**
  * StepRecorder — records TraceStep entries during a future interpreter run.
@@ -19,7 +19,10 @@ import type { InterpreterState } from '../types/interpreter.js';
 export class StepRecorder {
   private readonly steps: TraceStep[] = [];
 
-  public constructor(private readonly state: InterpreterState) {}
+  public constructor(
+    private readonly state: InterpreterState,
+    private readonly getVariablesForSnapshot?: () => VariableStore
+  ) {}
 
   /**
    * Records a single trace step.
@@ -42,12 +45,16 @@ export class StepRecorder {
 
     this.state.stepCount += 1;
 
+    const currentVars = this.getVariablesForSnapshot
+      ? this.getVariablesForSnapshot()
+      : this.state.variables;
+
     const step: TraceStep = {
       step: this.state.stepCount,
       line: params.line,
       type: params.type,
       description: params.description,
-      variables: snapshotVariables(this.state.variables),
+      variables: snapshotVariables(currentVars),
       callStack: this.state.callStack.map((frame) => frame.functionName),
     };
 

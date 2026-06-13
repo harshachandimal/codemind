@@ -7,6 +7,8 @@ import ComplexityLensPanel from '../visualizer/ComplexityLensPanel';
 import RecursionStackPreview from '../visualizer/RecursionStackPreview';
 import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
 import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
+import RecursionTreePanel from '../trace/RecursionTreePanel';
+import RecursionUnwindPanel from '../trace/RecursionUnwindPanel';
 
 type Props = { analysis: Analysis | null };
 
@@ -56,8 +58,15 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis }) => {
         </div>
       )}
 
+
       {/* Runtime Trace Summary */}
       <RuntimeTraceSummaryPanel analysis={analysis} />
+
+      {/* Recursion Tree (renders only if recursive trace exists) */}
+      <RecursionTreePanel analysis={analysis} />
+
+      {/* Recursion Unwinding (renders only if recursive trace exists) */}
+      <RecursionUnwindPanel analysis={analysis} />
 
       {/* Step-by-step execution timeline */}
       <RuntimeTraceTimeline analysis={analysis} />

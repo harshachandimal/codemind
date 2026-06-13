@@ -10,9 +10,16 @@ export const SUPPORTED_TRACE_SYNTAX = [
   'comparisons (<, <=, >, >=, ===, !==)',
   'simple if/else blocks',
   'simple for loops (for (let i = 0; i < n; i++))',
+  'simple while loops',
+  'while conditions using comparisons',
+  'strict loop limit protection',
   'array input values',
   'array index reads (arr[i])',
   'array length reads (arr.length)',
+  'simple self-recursion',
+  'recursive base cases',
+  'call stack tracing',
+  'max call depth protection',
 ];
 
 export const UNSUPPORTED_TRACE_SYNTAX = [
@@ -28,19 +35,20 @@ export const UNSUPPORTED_TRACE_SYNTAX = [
   'arrow functions',
   'array methods like map/filter/reduce/push/pop',
   'object literals and object methods',
-  'while loops',
-  'recursion for now',
   'nested advanced function calls',
   'try/catch',
   'new expressions',
+  'mutual recursion such as even() calling odd()',
+  'helper function calls other than the selected self-recursive function',
+  'nested functions',
+  'closures',
+  'async recursion',
+  'recursion through array methods',
 ];
 
-export const SUPPORTED_TRACE_EXAMPLE = `function sum(arr) {
-  let total = 0;
-
-  for (let i = 0; i < arr.length; i++) {
-    total = total + arr[i];
+export const SUPPORTED_TRACE_EXAMPLE = `function factorial(n) {
+  if (n === 0) {
+    return 1;
   }
-
-  return total;
+  return n * factorial(n - 1);
 }`;

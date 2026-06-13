@@ -28,7 +28,7 @@ export function getTraceErrorPresentation(
       return {
         title: 'This JavaScript syntax is not supported yet',
         description: 'The runtime tracer currently supports only a small safe subset of JavaScript.',
-        suggestion: 'Try a simple function with variables, if statements, for loops, array reads, and return statements.',
+        suggestion: 'Try simple functions with variables, if statements, for/while loops, array reads, returns, or simple self-recursion.',
         tone: 'info',
       };
     case 'PARSE_ERROR':
@@ -57,6 +57,13 @@ export function getTraceErrorPresentation(
         title: 'Loop limit reached',
         description: 'A loop ran longer than the safe tracing limit.',
         suggestion: 'Use smaller input values or reduce loop iterations.',
+        tone: 'warning',
+      };
+    case 'MAX_CALL_DEPTH_EXCEEDED':
+      return {
+        title: 'Recursion depth limit reached',
+        description: 'CodeMind stopped recursive tracing because the call stack became too deep.',
+        suggestion: 'Check that your recursive function has a base case and that the input is small enough.',
         tone: 'warning',
       };
     case 'VALIDATION_ERROR':

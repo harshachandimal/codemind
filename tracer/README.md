@@ -212,16 +212,16 @@ The first runtime tracer implementation uses an **AST interpreter** rather than 
 - `NumericLiteral`, `StringLiteral`, `BooleanLiteral`, `ArrayExpression`
 - Basic `BinaryExpression`: `+`, `-`, `*`, `/`, `%`, `<`, `<=`, `>`, `>=`, `===`, `!==`
 - Simple `AssignmentExpression` and `UpdateExpression` (`i++`, `i--`)
-- `ForStatement` (simple numeric counters), `IfStatement`
+- `ForStatement` (simple numeric counters), `IfStatement`, `WhileStatement` (with strict maxLoopIterations limit)
 - `MemberExpression` for array indexing
-- `CallExpression` (only for calling the entry function)
+- `CallExpression` (calling the entry function, and self-recursion)
 
 **Unsupported MVP syntax (fails safely):**
 - imports, `require`
 - async/await, Promise, fetch, DOM APIs
 - classes, `this`, `new`, closures, object methods
 - `try/catch`, generators, spread/rest, destructuring
-- recursion and `while` loops (deferred until step limits are robust)
+- Arbitrary function calls (e.g. helper functions, mutual recursion). Only self-recursion is supported with strict `maxCallDepth` protection.
 
 **Safety Limits:**
 - Enforced: `maxSteps`, `timeoutMs`, `maxSourceLength`, `maxOutputBytes`, `maxLoopIterations`, `maxCallDepth`, `maxArrayLength`

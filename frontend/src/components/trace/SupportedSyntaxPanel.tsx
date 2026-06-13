@@ -20,6 +20,7 @@ const SupportedSyntaxPanel: React.FC<SupportedSyntaxPanelProps> = ({ compact }) 
         <h3 className="text-sm font-semibold text-white/80">Supported Runtime Trace Syntax</h3>
         <p className="text-xs text-white/40 leading-relaxed">
           The runtime tracer supports a safe JavaScript subset so CodeMind can trace code step by step without running arbitrary JavaScript.
+          While loops are supported with a safe iteration limit to prevent infinite tracing. Recursive tracing is protected by a maximum call-depth limit, so missing base cases stop safely instead of running forever.
         </p>
       </div>
 

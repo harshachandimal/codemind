@@ -22,6 +22,7 @@
  * - AssignmentExpression (= operator, Identifier left side only)
  * - ExpressionStatement wrapping AssignmentExpression or UpdateExpression
  * - ForStatement (numeric counter, BlockStatement body, i++/i-- update)
+ * - WhileStatement (boolean condition, BlockStatement body)
  * - UpdateExpression: i++, i-- (postfix only)
  * - IfStatement (test evaluating to boolean, BlockStatement branches, else-if support)
  * - MemberExpression (array index reads `arr[i]`, array length `arr.length` only)
@@ -30,7 +31,7 @@
  * - BinaryExpression: +, -, *, /, <, <=, >, >=, ===, !==
  *
  * UNSUPPORTED (throws TraceInterpreterError):
- * - while/do-while loops, for-of, for-in
+ * - do-while loops, for-of, for-in
  * - classes, async, closures,
  *   arbitrary call expressions, arbitrary member expressions, objects,
  *   compound assignments (+=, -=, etc.), destructuring, var.
@@ -43,6 +44,7 @@ import type { InterpreterResult, RuntimeValue } from '../types/interpreter.js';
 import type { TraceRequest } from '../types/trace.js';
 import { findEntryFunction } from './core/findEntryFunction.js';
 import { executeFunctionCall } from './core/executeFunctionCall.js';
+import { TraceInterpreterError } from '../errors/TraceInterpreterError.js';
 
 export class JavaScriptInterpreter {
   /**
@@ -58,6 +60,20 @@ export class JavaScriptInterpreter {
     // ── Parse ────────────────────────────────────────────────────────────────
     const ast = parse(request.sourceCode, { sourceType: 'script' });
 
+    // ── Build Function Registry ──────────────────────────────────────────────
+    for (const statement of ast.program.body) {
+      if (statement.type === 'FunctionDeclaration' && statement.id) {
+        const fnName = statement.id.name;
+        if (env.functionRegistry.has(fnName)) {
+          throw new TraceInterpreterError(
+            `Duplicate function declaration for "${fnName}".`,
+            'DUPLICATE_FUNCTION_DECLARATION'
+          );
+        }
+        env.functionRegistry.set(fnName, statement);
+      }
+    }
+
     // ── Find entry function ──────────────────────────────────────────────────
     const targetFn = findEntryFunction(ast.program, request.entryFunction ?? null);
 
@@ -71,6 +87,8 @@ export class JavaScriptInterpreter {
       env.state.status = 'error';
       throw err; // The service layer will catch and wrap this
     }
+
+    env.state.status = 'completed';
 
     // ── Return structured result ─────────────────────────────────────────────
     return {

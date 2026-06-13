@@ -1,7 +1,9 @@
 import { TraceInterpreterError } from '../errors/TraceInterpreterError.js';
 import { createInitialInterpreterState } from './createInitialInterpreterState.js';
 import { StepRecorder } from './StepRecorder.js';
-import type { RuntimeValue, InterpreterState, CallFrame } from '../types/interpreter.js';
+import { assertCallDepthAvailable } from './assertCallDepth.js';
+import type { RuntimeValue, InterpreterState, CallFrame, VariableStore } from '../types/interpreter.js';
+import type { FunctionDeclaration } from '@babel/types';
 
 /**
  * InterpreterEnvironment — manages variable scope and call stack for
@@ -20,10 +22,31 @@ import type { RuntimeValue, InterpreterState, CallFrame } from '../types/interpr
 export class InterpreterEnvironment {
   public readonly state: InterpreterState;
   public readonly recorder: StepRecorder;
+  public readonly functionRegistry: Map<string, FunctionDeclaration> = new Map();
 
   public constructor() {
     this.state = createInitialInterpreterState();
-    this.recorder = new StepRecorder(this.state);
+    this.recorder = new StepRecorder(this.state, () => this.getCurrentVariables());
+  }
+
+  /**
+   * Internal helper to return the active variable scope.
+   * If inside a function frame, returns the frame's scope.
+   * Otherwise returns the root state scope.
+   */
+  private getCurrentVariableStore(): VariableStore {
+    const stackLen = this.state.callStack.length;
+    if (stackLen > 0) {
+      return this.state.callStack[stackLen - 1]!.variables;
+    }
+    return this.state.variables;
+  }
+
+  /**
+   * Returns the current active variable scope (for snapshotting).
+   */
+  public getCurrentVariables(): VariableStore {
+    return this.getCurrentVariableStore();
   }
 
   /**
@@ -31,45 +54,52 @@ export class InterpreterEnvironment {
    * If the variable already exists it is overwritten (var-like semantics for MVP).
    */
   public defineVariable(name: string, value: RuntimeValue): void {
-    this.state.variables[name] = value;
+    const store = this.getCurrentVariableStore();
+    store[name] = value;
   }
 
   /**
-   * Assigns a new value to an already-declared variable.
+   * Assigns a new value to an already-declared variable in the current scope.
    *
    * @throws {TraceInterpreterError} with code UNDEFINED_VARIABLE if
    *   the variable has not been declared.
    */
   public assignVariable(name: string, value: RuntimeValue): void {
-    if (!(name in this.state.variables)) {
+    const store = this.getCurrentVariableStore();
+    if (!(name in store)) {
       throw new TraceInterpreterError(
         `Assignment to undeclared variable "${name}".`,
         'UNDEFINED_VARIABLE',
       );
     }
-    this.state.variables[name] = value;
+    store[name] = value;
   }
 
   /**
-   * Returns the current value of a declared variable.
+   * Returns the current value of a declared variable in the current scope.
    *
    * @throws {TraceInterpreterError} with code UNDEFINED_VARIABLE if
    *   the variable has not been declared.
    */
   public getVariable(name: string): RuntimeValue {
-    if (!(name in this.state.variables)) {
+    const store = this.getCurrentVariableStore();
+    if (!(name in store)) {
       throw new TraceInterpreterError(
         `Reference to undeclared variable "${name}".`,
         'UNDEFINED_VARIABLE',
       );
     }
-    return this.state.variables[name]!;
+    return store[name]!;
   }
+
+  // TODO: Future recursion implementation needs local variable scope per call frame.
+  // Current environment helpers may need scope-aware variable lookup before recursion execution.
 
   /**
    * Pushes a new call frame onto the call stack and marks the interpreter running.
    */
   public pushFrame(frame: CallFrame): void {
+    assertCallDepthAvailable(this.state);
     this.state.callStack.push(frame);
     this.state.status = 'running';
   }

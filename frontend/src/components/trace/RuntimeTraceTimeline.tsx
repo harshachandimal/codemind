@@ -128,6 +128,8 @@ const RuntimeTraceTimeline: React.FC<Props> = ({ analysis }) => {
 
   const activeStep = visible[currentIndex];
 
+  const hasRecursion = allSteps.some((s) => s.callStack && s.callStack.length > 1);
+
   return (
     <Panel className="p-5 flex flex-col gap-4">
       {/* Header */}
@@ -137,6 +139,11 @@ const RuntimeTraceTimeline: React.FC<Props> = ({ analysis }) => {
             Execution Timeline
           </p>
           <p className="text-xs text-white/35">Follow how values changed step by step.</p>
+          {hasRecursion && (
+            <p className="text-[10px] text-indigo-300/80 mt-1">
+              Recursive calls appear as repeated function names in the call stack.
+            </p>
+          )}
         </div>
         <span className="text-xs font-semibold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full">
           {allSteps.length} step{allSteps.length !== 1 ? 's' : ''}

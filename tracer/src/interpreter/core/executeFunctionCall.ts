@@ -21,8 +21,13 @@ export function executeFunctionCall(
     );
   }
 
+  env.pushFrame({
+    functionName: fnName,
+    variables: {},
+    line: getNodeLine(targetFn),
+  });
+
   // Bind parameters
-  const initialVariables: Record<string, RuntimeValue> = {};
   for (let i = 0; i < targetFn.params.length; i++) {
     const param = targetFn.params[i];
     if (param && param.type !== 'Identifier') {
@@ -34,16 +39,9 @@ export function executeFunctionCall(
     if (param) {
       const paramName = (param as any).name;
       const paramValue = i < args.length ? args[i]! : undefined as unknown as RuntimeValue;
-      initialVariables[paramName] = paramValue;
       env.defineVariable(paramName, paramValue);
     }
   }
-
-  env.pushFrame({
-    functionName: fnName,
-    variables: initialVariables,
-    line: getNodeLine(targetFn),
-  });
 
   env.recorder.record({
     line: getNodeLine(targetFn),
@@ -58,19 +56,28 @@ export function executeFunctionCall(
     );
   }
 
-  const returnedValue = interpretBlock(targetFn.body, env, fnName);
+  // Save the parent's current status so the child's 'returned' status
+  // does not leak back and cause the parent's interpretBlock to exit early.
+  const savedStatus = env.state.status;
 
-  env.recorder.record({
-    line: null,
-    type: 'return',
-    description: `Function ${fnName} returned ${formatRuntimeValue(returnedValue as RuntimeValue)}.`,
-  });
+  try {
+    const returnedValue = interpretBlock(targetFn.body, env, fnName);
 
-  env.state.returnedValue = returnedValue;
-  env.state.status = 'completed';
-  env.popFrame();
+    env.recorder.record({
+      line: null,
+      type: 'return',
+      description: `Function ${fnName} returned ${formatRuntimeValue(returnedValue as RuntimeValue)}.`,
+    });
 
-  return returnedValue;
+    // Restore the parent frame's status so its block can keep executing.
+    // The actual return value is propagated through the call expression result.
+    env.state.status = savedStatus;
+    env.state.returnedValue = returnedValue;
+
+    return returnedValue;
+  } finally {
+    env.popFrame();
+  }
 }
 
 

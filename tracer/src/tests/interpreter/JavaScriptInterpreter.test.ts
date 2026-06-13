@@ -667,4 +667,310 @@ describe('JavaScriptInterpreter', () => {
       }),
     ).toThrow(TraceInterpreterError); // Should throw due to Unsupported Expression (CallExpression)
   });
+
+  // ── While-loop tests (Step 10.1) ──────────────────────────────────────────
+
+  it('interprets_simple_while_countdown', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function countdown(n) {
+  let total = 0;
+  while (n > 0) {
+    total = total + n;
+    n = n - 1;
+  }
+  return total;
+}`,
+      entryFunction: 'countdown',
+      input: [3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(6);
+
+    const types = result.steps.map((s) => s.type);
+    expect(types).toContain('loop_start');
+    expect(types).toContain('loop_iteration');
+    expect(types).toContain('loop_exit');
+    
+    // assignment steps show n changing
+    const assignments = result.steps.filter(s => s.type === 'assignment');
+    expect(assignments.some(s => s.variables['n'] === 2)).toBe(true);
+  });
+
+  it('interprets_while_array_sum', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function sum(arr) {
+  let total = 0;
+  let i = 0;
+  while (i < arr.length) {
+    total = total + arr[i];
+    i++;
+  }
+  return total;
+}`,
+      entryFunction: 'sum',
+      input: [[2, 4, 6]],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(12);
+
+    const types = result.steps.map((s) => s.type);
+    expect(types).toContain('array_read');
+
+    // loop iterations count should be 3
+    const iterations = types.filter(t => t === 'loop_iteration').length;
+    expect(iterations).toBe(3);
+  });
+
+  it('supports_return_inside_while', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function firstPositive(arr) {
+  let i = 0;
+  while (i < arr.length) {
+    if (arr[i] > 0) {
+      return arr[i];
+    }
+    i++;
+  }
+  return 0;
+}`,
+      entryFunction: 'firstPositive',
+      input: [[-2, -1, 5]],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(5);
+  });
+
+  it('rejects_while_without_block_body', () => {
+    expect(() =>
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function bad(n) {
+  while (n > 0) n = n - 1;
+  return n;
+}`,
+        entryFunction: 'bad',
+        input: [3],
+      })
+    ).toThrow(TraceInterpreterError);
+  });
+
+  it('enforces_max_loop_iterations_for_while', () => {
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function bad() {
+  let n = 1;
+  while (n > 0) {
+    n = n + 1;
+  }
+  return n;
+}`,
+        entryFunction: 'bad',
+        input: [],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    expect(error.code).toBe('MAX_LOOP_ITERATIONS_EXCEEDED');
+  });
+
+  it('rejects_non_boolean_while_condition', () => {
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function bad(n) {
+  while (n) {
+    n = n - 1;
+  }
+  return n;
+}`,
+        entryFunction: 'bad',
+        input: [3],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    expect(error.code).toBe('UNSUPPORTED_EXPRESSION');
+  });
+
+
+  // ── Call Frame Scope (Step 10.4) ────────────────────────────────────────
+
+  it('parameters_are_scoped_to_function_frame', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function add(a, b) {
+  let total = a + b;
+  return total;
+}`,
+      entryFunction: 'add',
+      input: [2, 3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(5);
+    
+    // Variables must be inside trace steps representing current active scope
+    const varDeclStep = result.steps.find((s) => s.type === 'variable_declaration');
+    expect(varDeclStep).toBeDefined();
+    expect(varDeclStep!.variables['a']).toBe(2);
+    expect(varDeclStep!.variables['b']).toBe(3);
+    expect(varDeclStep!.variables['total']).toBe(5);
+
+    // Call stack should be empty after run
+    expect(result.finalState.callStack).toHaveLength(0);
+    // state.variables might be empty depending on tests/if they were declared globally
+    // We only enforce that function scope was isolated.
+  });
+
+  // ── Recursion Tests (Step 10.5) ──────────────────────────────────────────
+
+  it('interprets_factorial_recursion', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function factorial(n) {
+  if (n === 0) {
+    return 1;
+  }
+  return n * factorial(n - 1);
+}`,
+      entryFunction: 'factorial',
+      input: [4],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(24);
+    expect(result.terminatedReason).toBe('completed');
+    expect(result.finalState.callStack).toHaveLength(0);
+
+    const callSteps = result.steps.filter((s) => s.type === 'function_call');
+    expect(callSteps.length).toBeGreaterThan(1);
+    
+    const returnSteps = result.steps.filter((s) => s.type === 'return');
+    expect(returnSteps.length).toBeGreaterThan(1);
+  });
+
+  it('interprets_countdown_recursion', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function countdown(n) {
+  if (n === 0) {
+    return 0;
+  }
+  return countdown(n - 1);
+}`,
+      entryFunction: 'countdown',
+      input: [3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(0);
+    const callSteps = result.steps.filter((s) => s.type === 'function_call');
+    expect(callSteps.length).toBeGreaterThan(1);
+  });
+
+  it('enforces_max_call_depth', () => {
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function bad(n) {
+  return bad(n + 1);
+}`,
+        entryFunction: 'bad',
+        input: [1],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    expect(error.code).toBe('MAX_CALL_DEPTH_EXCEEDED');
+  });
+
+  it('rejects_helper_function_call', () => {
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function helper(n) {
+  return n;
+}
+function main(n) {
+  return helper(n);
+}`,
+        entryFunction: 'main',
+        input: [5],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    expect(error.code).toBe('UNSUPPORTED_FUNCTION_CALL');
+  });
+
+  it('rejects_mutual_recursion', () => {
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function even(n) {
+  if (n === 0) {
+    return true;
+  }
+  return odd(n - 1);
+}
+function odd(n) {
+  if (n === 0) {
+    return false;
+  }
+  return even(n - 1);
+}`,
+        entryFunction: 'even',
+        input: [2],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    expect(error.code).toBe('UNSUPPORTED_FUNCTION_CALL');
+  });
+
+  it('recursion_uses_isolated_call_frame_variables', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function count(n) {
+  if (n === 0) {
+    return 0;
+  }
+  let next = n - 1;
+  return count(next);
+}`,
+      entryFunction: 'count',
+      input: [3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(0);
+    expect(result.finalState.callStack).toHaveLength(0);
+    
+    // Check snapshots show different n values
+    const declSteps = result.steps.filter((s) => s.type === 'variable_declaration' && 'next' in s.variables);
+    expect(declSteps.length).toBeGreaterThan(0);
+    expect(declSteps[0]?.variables['n']).not.toBe(declSteps[1]?.variables['n']);
+  });
 });

@@ -58,4 +58,19 @@ describe('StepRecorder', () => {
 
     expect(state.status).toBe('max_steps');
   });
+
+  it('records_snapshot_from_custom_variable_provider', () => {
+    const state = createInitialInterpreterState();
+    const recorder = new StepRecorder(state, () => ({ local: 123 }));
+    
+    const step = recorder.record({
+      line: null,
+      type: 'assignment',
+      description: 'test custom provider',
+    });
+    
+    expect(step.variables['local']).toBe(123);
+    // state.variables is ignored if custom provider exists
+    expect(step.variables).not.toHaveProperty('globalVar');
+  });
 });

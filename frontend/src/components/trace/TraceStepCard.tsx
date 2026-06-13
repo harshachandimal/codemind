@@ -2,6 +2,7 @@ import React from 'react';
 import type { TraceStep } from '../../types/analysis';
 import { getTraceStepLabel, getTraceStepTone, type StepTone } from '../../utils/traceStepLabels';
 import VariableSnapshotInspector from './VariableSnapshotInspector';
+import { formatCallStack } from '../../utils/formatCallStack';
 
 type Props = {
   step: TraceStep;
@@ -77,10 +78,11 @@ const TraceStepCard: React.FC<Props> = ({ step, isActive = false, onSelect, chan
         {/* Description */}
         <p className="text-xs text-white/70 leading-relaxed">{step.description}</p>
 
+
         {/* Call stack */}
         {step.callStack && step.callStack.length > 0 && (
           <p className="text-[10px] text-white/35 font-mono">
-            Stack: {step.callStack.join(' → ')}
+            <span className="text-white/20">Call stack:</span> {formatCallStack(step.callStack)}
           </p>
         )}
 
