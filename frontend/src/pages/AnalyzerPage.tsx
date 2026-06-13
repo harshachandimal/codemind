@@ -4,6 +4,9 @@ import SectionHeader from '../components/common/SectionHeader';
 import CodeInputPanel from '../components/analyzer/CodeInputPanel';
 import SupportedSyntaxPanel from '../components/trace/SupportedSyntaxPanel';
 import AnalysisResultPanel from '../components/analyzer/AnalysisResultPanel';
+import TraceExamplesLibrary from '../components/analyzer/TraceExamplesLibrary';
+import ExampleExpectationPanel from '../components/analyzer/ExampleExpectationPanel';
+import { TraceExample } from '../constants/traceExamples';
 import { Analysis } from '../types/analysis';
 import { createAnalysis } from '../services/analysisService';
 
@@ -23,15 +26,32 @@ const AnalyzerPage: React.FC = () => {
   const [latestAnalysis, setLatestAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [activeExample, setActiveExample] = useState<TraceExample | null>(null);
 
-  const handleSubmit = async () => {
-    if (!sourceCode.trim()) return;
+  const handleSelectExample = (example: TraceExample) => {
+    setActiveExample(example);
+    setTitle(example.title);
+    setSourceCode(example.sourceCode);
+    setEntryFunction(example.entryFunction);
+    setInputJson(JSON.stringify(example.input, null, 2));
+    setSuccessMessage(`Loaded example: ${example.title}`);
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  const submitAnalysisPayload = async (payload: {
+    title: string;
+    sourceCode: string;
+    entryFunction: string;
+    inputJson: string;
+  }) => {
+    if (!payload.sourceCode.trim()) return;
     setError(null);
     setLoading(true);
     try {
       let parsedInput: unknown[] | undefined = undefined;
-      if (inputJson.trim()) {
-        const parsed = JSON.parse(inputJson);
+      if (payload.inputJson.trim()) {
+        const parsed = JSON.parse(payload.inputJson);
         if (!Array.isArray(parsed)) {
           setError('Input must be a valid JSON array.');
           setLoading(false);
@@ -41,10 +61,10 @@ const AnalyzerPage: React.FC = () => {
       }
 
       const res = await createAnalysis({
-        title,
+        title: payload.title,
         language: 'javascript',
-        source_code: sourceCode,
-        entryFunction: entryFunction.trim() || null,
+        source_code: payload.sourceCode,
+        entryFunction: payload.entryFunction.trim() || null,
         input: parsedInput,
       });
       if (res.data) {
@@ -57,6 +77,27 @@ const AnalyzerPage: React.FC = () => {
     }
   };
 
+  const handleSubmit = async () => {
+    await submitAnalysisPayload({ title, sourceCode, entryFunction, inputJson });
+  };
+
+  const handleRunExample = async (example: TraceExample) => {
+    setActiveExample(example);
+    setTitle(example.title);
+    setSourceCode(example.sourceCode);
+    setEntryFunction(example.entryFunction);
+    const inputStr = JSON.stringify(example.input, null, 2);
+    setInputJson(inputStr);
+    setSuccessMessage(null);
+    
+    await submitAnalysisPayload({
+      title: example.title,
+      sourceCode: example.sourceCode,
+      entryFunction: example.entryFunction,
+      inputJson: inputStr,
+    });
+  };
+
   return (
     <PageShell>
       <div className="w-full max-w-7xl mx-auto px-6 py-12">
@@ -66,6 +107,12 @@ const AnalyzerPage: React.FC = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           <div className="flex flex-col gap-8">
+            <TraceExamplesLibrary onSelectExample={handleSelectExample} onRunExample={handleRunExample} />
+            {successMessage && (
+              <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-3 rounded-xl text-sm font-medium">
+                {successMessage}
+              </div>
+            )}
             <CodeInputPanel
               title={title}
               sourceCode={sourceCode}
@@ -81,7 +128,10 @@ const AnalyzerPage: React.FC = () => {
             />
             <SupportedSyntaxPanel compact={true} />
           </div>
-          <AnalysisResultPanel analysis={latestAnalysis} />
+          <div className="flex flex-col gap-8">
+            <ExampleExpectationPanel example={activeExample} analysis={latestAnalysis} />
+            <AnalysisResultPanel analysis={latestAnalysis} />
+          </div>
         </div>
       </div>
     </PageShell>
