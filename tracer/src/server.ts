@@ -15,7 +15,7 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import { SERVER_CONFIG } from './config/serverConfig.js';
-import { EXECUTION_CONFIG } from './config/executionConfig.js';
+import { isTracerExecutionEnabled, isPythonTracerEnabled } from './config/runtimeFlags.js';
 import traceRoutes from './routes/traceRoutes.js';
 
 const app = express();
@@ -48,8 +48,8 @@ app.get('/health', (_req: Request, res: Response): void => {
     success: true,
     service: 'CodeMind Tracer',
     status: 'ready',
-    // Reflects TRACER_EXECUTION_ENABLED env var — false by default.
-    executionEnabled: EXECUTION_CONFIG.executionEnabled,
+    executionEnabled: isTracerExecutionEnabled(),
+    pythonRuntimeEnabled: isPythonTracerEnabled(),
   });
 });
 

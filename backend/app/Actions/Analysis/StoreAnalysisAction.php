@@ -24,7 +24,7 @@ class StoreAnalysisAction
             $data['language']
         );
 
-        if (strtolower($data['language']) === 'javascript') {
+        if ($this->shouldRequestRuntimeTrace($data['language'])) {
             $traceRequest = new TraceRequestData(
                 language: $data['language'],
                 sourceCode: $data['source_code'],
@@ -41,13 +41,43 @@ class StoreAnalysisAction
             $traceError = $traceResponse->error;
             $traceMetadata = $traceResponse->metadata;
         } else {
-            $traceMode = 'unsupported_language';
-            $traceSteps = [];
-            $traceSummary = null;
-            $traceResult = null;
-            $tracePlan = null;
-            $traceError = 'Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.';
-            $traceMetadata = null;
+            $lang = strtolower($data['language']);
+            if ($lang === 'python') {
+                $traceMode = 'planned'; // Or unsupported_language depending on convention, prompt says planned or unsupported. I'll use 'planned'. Wait, prompt suggests 'unsupported_language' or 'planned'.
+                $traceSteps = [];
+                $traceSummary = null;
+                $traceResult = null;
+                $tracePlan = null;
+                $traceError = [
+                    'code' => 'PYTHON_RUNTIME_TRACE_DISABLED',
+                    'message' => 'Python runtime tracing is currently disabled. Static complexity analysis is available.'
+                ];
+                $traceMetadata = null;
+            } elseif ($lang === 'java') {
+                $traceMode = 'unsupported_language';
+                $traceSteps = [];
+                $traceSummary = null;
+                $traceResult = null;
+                $tracePlan = null;
+                $traceError = [
+                    'code' => 'JAVA_RUNTIME_TRACE_UNSUPPORTED',
+                    'message' => 'Java runtime tracing is not available yet. Static complexity analysis is available.'
+                ];
+                $traceMetadata = null;
+            } else {
+                // If tracer is disabled globally but it's JS, the TracerClient itself handles this if called. 
+                // However, since shouldRequestRuntimeTrace returns false for JS if globally disabled, we need a default disabled response here.
+                $traceMode = 'planned';
+                $traceSteps = [];
+                $traceSummary = null;
+                $traceResult = null;
+                $tracePlan = null;
+                $traceError = [
+                    'code' => 'TRACER_DISABLED',
+                    'message' => 'Runtime tracing is currently disabled globally. Static complexity analysis is available.'
+                ];
+                $traceMetadata = null;
+            }
         }
 
         return Analysis::create([
@@ -68,5 +98,18 @@ class StoreAnalysisAction
             'trace_error'       => $traceError,
             'trace_metadata'    => $traceMetadata,
         ]);
+    }
+
+    private function shouldRequestRuntimeTrace(string $language): bool
+    {
+        if (!config('tracer.enabled')) {
+            return false;
+        }
+
+        return match (strtolower($language)) {
+            'javascript' => true,
+            'python' => (bool) config('tracer.python_enabled'),
+            default => false,
+        };
     }
 }

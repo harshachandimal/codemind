@@ -205,10 +205,9 @@ class AnalysisApiTest extends TestCase
         $response->assertStatus(201)
             ->assertJsonPath('data.analysis.trace_mode', 'planned')
             ->assertJsonPath('data.analysis.trace_steps', [])
-            ->assertJsonPath('data.analysis.trace_summary.totalSteps', 0)
-            ->assertJsonPath('data.analysis.trace_summary.terminatedReason', 'not_executed')
+            ->assertJsonPath('data.analysis.trace_summary', null)
             ->assertJsonPath('data.analysis.trace_result', null)
-            ->assertJsonPath('data.analysis.trace_error', null);
+            ->assertJsonPath('data.analysis.trace_error.code', 'TRACER_DISABLED');
             
         \Illuminate\Support\Facades\Http::assertNothingSent();
     }
@@ -322,8 +321,10 @@ class AnalysisApiTest extends TestCase
         $this->assertStringNotContainsString('Connection failed', $response->json('message'));
     }
 
-    public function test_python_and_java_do_not_call_tracer()
+    public function test_python_analysis_skips_tracer_when_python_flag_disabled()
     {
+        config(['tracer.enabled' => true]);
+        config(['tracer.python_enabled' => false]);
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
@@ -336,8 +337,96 @@ class AnalysisApiTest extends TestCase
         $response = $this->postJson('/api/analyses', $payload);
 
         $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'planned')
+            ->assertJsonPath('data.analysis.trace_error.code', 'PYTHON_RUNTIME_TRACE_DISABLED')
+            ->assertJsonPath('data.analysis.trace_steps', []);
+            
+        \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+
+    public function test_python_analysis_calls_tracer_when_python_flag_enabled()
+    {
+        config(['tracer.enabled' => true]);
+        config(['tracer.python_enabled' => true]);
+        config(['tracer.service_url' => 'http://tracer.test']);
+        
+        \Illuminate\Support\Facades\Http::fake([
+            'http://tracer.test/trace' => \Illuminate\Support\Facades\Http::response([
+                "success" => true,
+                "executionEnabled" => true,
+                "mode" => "executed",
+                "message" => "Trace executed successfully.",
+                "trace" => [
+                    "steps" => [
+                        [
+                            "step" => 1,
+                            "line" => null,
+                            "type" => "function_call",
+                            "description" => "Called add",
+                            "variables" => [],
+                            "callStack" => ["add"]
+                        ]
+                    ],
+                    "summary" => [
+                        "totalSteps" => 1,
+                        "terminatedReason" => "completed"
+                    ]
+                ],
+                "result" => [
+                    "returnedValue" => 5
+                ],
+                "plan" => null,
+                "error" => null,
+                "metadata" => [
+                    "language" => "python",
+                    "entryFunction" => "add",
+                    "analyzedAt" => "2026-06-11T00:00:00.000Z"
+                ]
+            ], 200)
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Add function',
+            'language'    => 'python',
+            'source_code' => 'def add(a, b): return a + b',
+            'entryFunction' => 'add',
+            'input' => [2, 3]
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'executed')
+            ->assertJsonPath('data.analysis.trace_result.returnedValue', 5);
+
+        \Illuminate\Support\Facades\Http::assertSent(function ($request) {
+            return $request->url() == 'http://tracer.test/trace' &&
+                   $request['language'] == 'python';
+        });
+    }
+
+    public function test_java_analysis_never_calls_tracer()
+    {
+        config(['tracer.enabled' => true]);
+        config(['tracer.python_enabled' => true]);
+        
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Java script',
+            'language'    => 'java',
+            'source_code' => 'class Main {}',
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        $response->assertStatus(201)
             ->assertJsonPath('data.analysis.trace_mode', 'unsupported_language')
-            ->assertJsonPath('data.analysis.trace_error', 'Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.')
+            ->assertJsonPath('data.analysis.trace_error.code', 'JAVA_RUNTIME_TRACE_UNSUPPORTED')
             ->assertJsonPath('data.analysis.trace_steps', []);
             
         \Illuminate\Support\Facades\Http::assertNothingSent();

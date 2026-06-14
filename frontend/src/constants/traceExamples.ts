@@ -209,7 +209,7 @@ export const TRACE_EXAMPLES: TraceExample[] = [
     learningPoints: [
       'The loop runs n times.',
       'Static time complexity is O(n).',
-      'Runtime tracing is currently JavaScript-only, so Python shows static analysis only for now.'
+      'Python runtime tracing is experimental and may be disabled depending on server settings.'
     ],
   },
   {
@@ -274,7 +274,7 @@ export const TRACE_EXAMPLES: TraceExample[] = [
     learningPoints: [
       'The for loop runs n times.',
       'Static complexity is O(n).',
-      'Runtime tracing is currently JavaScript-only.'
+      'Python runtime tracing is experimental and may be disabled depending on server settings.'
     ],
   },
   {

@@ -1,22 +1,37 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Panel from '../common/Panel';
 import { TRACE_EXAMPLES, TraceExample, TraceExampleCategory } from '../../constants/traceExamples';
-import TraceExampleCard from './TraceExampleCard';
 import TraceExampleFilters from './TraceExampleFilters';
 import TraceExamplePreviewModal from './TraceExamplePreviewModal';
+import LanguageTabs from './LanguageTabs';
+import TraceExampleList from './TraceExampleList';
 
 type Props = {
+  selectedLanguage: string;
+  onLanguageChange: (language: string) => void;
   onSelectExample: (example: TraceExample) => void;
   onRunExample?: (example: TraceExample) => void;
 };
 
-const TraceExamplesLibrary: React.FC<Props> = ({ onSelectExample, onRunExample }) => {
+const TraceExamplesLibrary: React.FC<Props> = ({ 
+  selectedLanguage, 
+  onLanguageChange, 
+  onSelectExample, 
+  onRunExample 
+}) => {
   const [selectedCategory, setSelectedCategory] = useState<TraceExampleCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewExample, setPreviewExample] = useState<TraceExample | null>(null);
 
+  // Reset filters and preview when language changes
+  useEffect(() => {
+    setPreviewExample(null);
+  }, [selectedLanguage]);
+
   const filteredExamples = useMemo(() => {
     return TRACE_EXAMPLES.filter((example) => {
+      if (example.language !== selectedLanguage) return false;
+      
       const matchesCategory = selectedCategory === 'all' || example.category === selectedCategory;
       if (!matchesCategory) return false;
 
@@ -29,17 +44,26 @@ const TraceExamplesLibrary: React.FC<Props> = ({ onSelectExample, onRunExample }
         example.category.toLowerCase().includes(lowerQuery)
       );
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedLanguage, selectedCategory, searchQuery]);
 
   return (
     <>
       <Panel className="p-6 flex flex-col gap-6">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">Try a Trace Example</h2>
-            <span className="text-xs font-medium text-white/40">Showing {filteredExamples.length} of {TRACE_EXAMPLES.length} examples</span>
+            <div>
+              <h2 className="text-lg font-bold text-white mb-1">Try a Trace Example</h2>
+              <p className="text-sm text-white/50">Load a safe example that CodeMind can trace step by step.</p>
+            </div>
+            <span className="text-xs font-medium text-white/40 bg-white/5 px-3 py-1 rounded-full">
+              {filteredExamples.length} Examples
+            </span>
           </div>
-          <p className="text-sm text-white/50">Load a safe example that CodeMind can trace step by step.</p>
+
+          <LanguageTabs 
+            selectedLanguage={selectedLanguage} 
+            onLanguageChange={onLanguageChange} 
+          />
         </div>
 
         <TraceExampleFilters
@@ -49,17 +73,10 @@ const TraceExamplesLibrary: React.FC<Props> = ({ onSelectExample, onRunExample }
           onSearchChange={setSearchQuery}
         />
         
-        {filteredExamples.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredExamples.map((example) => (
-              <TraceExampleCard key={example.id} example={example} onClick={() => setPreviewExample(example)} />
-            ))}
-          </div>
-        ) : (
-          <div className="py-8 text-center border border-dashed border-white/10 rounded-xl bg-white/5">
-            <p className="text-sm text-white/50">No examples found. Try another category or search term.</p>
-          </div>
-        )}
+        <TraceExampleList 
+          examples={filteredExamples} 
+          onSelectExample={setPreviewExample} 
+        />
       </Panel>
 
       <TraceExamplePreviewModal

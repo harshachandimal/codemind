@@ -19,7 +19,7 @@ export type TraceApiResponse = {
     message: string;
   } | null;
   metadata: {
-    language: 'javascript';
+    language: 'javascript' | 'python';
     entryFunction: string | null;
     analyzedAt: string;
   };

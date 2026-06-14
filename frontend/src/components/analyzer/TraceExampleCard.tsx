@@ -19,22 +19,22 @@ const TraceExampleCard: React.FC<Props> = ({ example, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-start gap-2 p-4 bg-black/20 hover:bg-black/40 border border-white/5 hover:border-white/10 rounded-xl transition-all text-left"
+      className="flex flex-col items-start gap-3 p-4 bg-black/20 hover:bg-black/40 border border-white/5 hover:border-white/10 rounded-xl transition-all text-left h-full"
     >
-      <div className="flex items-center justify-between w-full">
-        <span className="font-medium text-sm text-white">{example.title}</span>
-        <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border ${categoryColors[example.category] || 'bg-white/10 text-white border-white/20'}`}>
+      <div className="flex items-start justify-between w-full gap-2">
+        <span className="font-semibold text-sm text-white/90 leading-tight">{example.title}</span>
+        <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border whitespace-nowrap ${categoryColors[example.category] || 'bg-white/10 text-white border-white/20'}`}>
           {example.category}
         </span>
       </div>
-      <p className="text-xs text-white/40 line-clamp-2">{example.description}</p>
-      <div className="flex items-center gap-2 mt-2 w-full flex-wrap">
-        <div className="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">
-          fn: {example.entryFunction}
+      <p className="text-xs text-white/40 line-clamp-2 min-h-[32px] flex-grow">{example.description}</p>
+      <div className="flex items-center gap-2 w-full flex-wrap pt-2 border-t border-white/5">
+        <div className="text-[11px] font-mono text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded">
+          {example.entryFunction}()
         </div>
         {example.expectedResult !== undefined && (
-          <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-            Expected: {formatTraceValue ? formatTraceValue(example.expectedResult) : JSON.stringify(example.expectedResult)}
+          <div className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded truncate max-w-full">
+            → {formatTraceValue ? formatTraceValue(example.expectedResult) : JSON.stringify(example.expectedResult)}
           </div>
         )}
       </div>

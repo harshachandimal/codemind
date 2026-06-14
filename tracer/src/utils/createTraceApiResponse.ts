@@ -4,8 +4,9 @@ import type { InterpreterResult } from '../types/interpreter.js';
 
 export function createPlannedTraceResponse(params: {
   message: string;
-  plan: TracePlan;
+  plan: TracePlan | null;
   entryFunction: string | null;
+  language?: 'javascript' | 'python';
 }): TraceApiResponse {
   return {
     success: false,
@@ -23,7 +24,7 @@ export function createPlannedTraceResponse(params: {
     plan: params.plan,
     error: null,
     metadata: {
-      language: 'javascript',
+      language: params.language ?? 'javascript',
       entryFunction: params.entryFunction,
       analyzedAt: new Date().toISOString(),
     },
@@ -32,9 +33,10 @@ export function createPlannedTraceResponse(params: {
 
 export function createExecutedTraceResponse(params: {
   message: string;
-  interpreterResult: InterpreterResult;
+  interpreterResult: any; // Using any or specific type if needed, but wait it was InterpreterResult
   plan: TracePlan | null;
   entryFunction: string | null;
+  language?: 'javascript' | 'python';
 }): TraceApiResponse {
   // Gracefully construct the summary even if the interpreterResult doesn't fully conform yet,
   // though the interpreter returns steps and finalState.
@@ -56,7 +58,7 @@ export function createExecutedTraceResponse(params: {
     plan: params.plan,
     error: null,
     metadata: {
-      language: 'javascript',
+      language: params.language ?? 'javascript',
       entryFunction: params.entryFunction,
       analyzedAt: new Date().toISOString(),
     },
@@ -69,6 +71,7 @@ export function createErrorTraceResponse(params: {
   executionEnabled: boolean;
   plan?: TracePlan | null;
   entryFunction: string | null;
+  language?: 'javascript' | 'python';
 }): TraceApiResponse {
   return {
     success: false,
@@ -89,7 +92,7 @@ export function createErrorTraceResponse(params: {
       message: params.message,
     },
     metadata: {
-      language: 'javascript',
+      language: params.language ?? 'javascript',
       entryFunction: params.entryFunction,
       analyzedAt: new Date().toISOString(),
     },

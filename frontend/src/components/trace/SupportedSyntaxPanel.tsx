@@ -18,7 +18,7 @@ const SupportedSyntaxPanel: React.FC<SupportedSyntaxPanelProps> = ({ compact }) 
         <h3 className="text-sm font-semibold text-white/80">Language Support & Syntax</h3>
         <p className="text-xs text-white/40 leading-relaxed">
           Static complexity analysis is supported for JavaScript, Python, and Java. 
-          Runtime trace step-by-step execution currently supports JavaScript only. 
+          Runtime trace step-by-step execution is fully supported for JavaScript and experimentally supported for Python. 
           While loops are supported with a safe iteration limit to prevent infinite tracing. 
           Recursive tracing is protected by a maximum call-depth limit.
         </p>
@@ -52,7 +52,7 @@ const SupportedSyntaxPanel: React.FC<SupportedSyntaxPanelProps> = ({ compact }) 
           </h4>
           <ul className="flex flex-col gap-1.5 text-[11px] text-white/60">
             <li><span className="text-indigo-400">✓</span> Static analysis: supported</li>
-            <li><span className="text-white/30">−</span> Runtime trace: coming later</li>
+            <li><span className="text-indigo-400">✓</span> Runtime trace: experimental, requires runtime flags</li>
             <li><span className="text-indigo-400">✓</span> for/while loops, nested loops, recursion detection supported</li>
           </ul>
         </div>

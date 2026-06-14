@@ -121,7 +121,12 @@ const AnalyzerPage: React.FC = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           <div className="flex flex-col gap-8">
-            <TraceExamplesLibrary onSelectExample={handleSelectExample} onRunExample={handleRunExample} />
+            <TraceExamplesLibrary 
+              selectedLanguage={language}
+              onLanguageChange={setLanguage}
+              onSelectExample={handleSelectExample} 
+              onRunExample={handleRunExample} 
+            />
             {successMessage && (
               <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-3 rounded-xl text-sm font-medium">
                 {successMessage}

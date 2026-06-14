@@ -70,8 +70,8 @@ export type TraceResult = {
  * It MUST NOT be evaluated with eval, Function, or vm in any unsafe context.
  */
 export type TraceRequest = {
-  /** Target language. Currently only 'javascript' is planned. */
-  language: 'javascript';
+  /** Target language. */
+  language: 'javascript' | 'python';
   /** Raw source code string to be traced (not executed yet). */
   sourceCode: string;
   /** Optional name of the entry function to call. */

@@ -30,8 +30,9 @@ import { validateTraceRequest } from '../validators/traceRequestValidator.js';
 import { runJavaScriptPreflight } from '../security/javascriptPreflight.js';
 import { parseJavaScriptToSummary } from '../parsers/javascriptAstParser.js';
 import { generateTracePlan } from '../planners/tracePlanGenerator.js';
-import { EXECUTION_CONFIG } from '../config/executionConfig.js';
+import { isTracerExecutionEnabled, isPythonTracerEnabled } from '../config/runtimeFlags.js';
 import { JavaScriptInterpreter } from '../interpreter/JavaScriptInterpreter.js';
+import { PythonInterpreter } from '../python/pythonInterpreter.js';
 import { TraceValidationError } from '../errors/TraceValidationError.js';
 import { TraceSafetyError } from '../errors/TraceSafetyError.js';
 import { TraceParseError } from '../errors/TraceParseError.js';
@@ -55,7 +56,7 @@ export class TraceService {
    */
   public trace(rawRequest: unknown): TraceApiResponse {
     let entryFunction: string | null = null;
-    const executionEnabled = EXECUTION_CONFIG.executionEnabled;
+    const executionEnabled = isTracerExecutionEnabled();
 
     // We can extract entryFunction safely if the payload seems to have it,
     // so we can include it in early error responses.
@@ -88,7 +89,68 @@ export class TraceService {
       });
     }
 
-    // ── Step 2: Static safety preflight ───────────────────────────────────────
+    // ── Step 2: Python branch ─────────────────────────────────────────────────
+    if (validatedRequest.language === 'python') {
+      if (!executionEnabled) {
+        return createPlannedTraceResponse({
+          message: 'Runtime execution is disabled.',
+          plan: null,
+          entryFunction,
+          language: 'python',
+        });
+      }
+      
+      const pythonEnabled = isPythonTracerEnabled();
+      if (!pythonEnabled) {
+        return createPlannedTraceResponse({
+          message: 'Python runtime tracing is not enabled yet.',
+          plan: null,
+          entryFunction,
+          language: 'python',
+        });
+      }
+
+      try {
+        const interpreter = new PythonInterpreter();
+        const result = interpreter.run({
+          sourceCode: validatedRequest.sourceCode,
+          entryFunction: validatedRequest.entryFunction || 'main',
+          input: validatedRequest.input || []
+        });
+
+        return createExecutedTraceResponse({
+          message: 'Execution completed successfully.',
+          // Adapter for InterpreterResult
+          interpreterResult: {
+            steps: result.steps,
+            finalState: { returnedValue: result.returnedValue },
+            terminatedReason: 'completed'
+          },
+          plan: null,
+          entryFunction,
+          language: 'python',
+        });
+      } catch (error: any) {
+        if (error instanceof TraceInterpreterError) {
+          return createErrorTraceResponse({
+            message: 'Trace interpreter error: ' + error.message,
+            errorCode: error.code || 'PYTHON_TRACE_ERROR',
+            executionEnabled,
+            entryFunction,
+            language: 'python',
+          });
+        }
+        return createErrorTraceResponse({
+          message: 'An unexpected error occurred during Python interpretation.',
+          errorCode: 'UNKNOWN_TRACE_ERROR',
+          executionEnabled,
+          entryFunction,
+          language: 'python',
+        });
+      }
+    }
+
+    // ── Step 3: Static safety preflight (JavaScript) ──────────────────────────
     try {
       runJavaScriptPreflight(validatedRequest.sourceCode);
     } catch (error) {

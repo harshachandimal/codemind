@@ -97,9 +97,19 @@ const RuntimeTraceSummaryPanel: React.FC<Props> = ({ analysis }) => {
       {/* Planned */}
       {trace_mode === 'planned' && (
         <>
-          <p className="text-xs text-indigo-300/80">
-            Runtime execution was not enabled, but CodeMind generated a trace plan.
-          </p>
+          {trace_error?.code === 'PYTHON_RUNTIME_TRACE_DISABLED' ? (
+            <p className="text-xs text-indigo-300/80">
+              Python runtime tracing is currently disabled. Static complexity analysis is available.
+            </p>
+          ) : trace_error?.message?.includes('Python runtime tracing is not enabled yet') ? (
+            <p className="text-xs text-indigo-300/80">
+              Python runtime tracing is not enabled yet. Static complexity analysis is available.
+            </p>
+          ) : (
+            <p className="text-xs text-indigo-300/80">
+              Runtime execution was not enabled, but CodeMind generated a trace plan.
+            </p>
+          )}
           {trace_plan && (
             <div className="flex flex-col gap-0">
               <MetricRow label="Planned steps" value={String(trace_plan.steps.length)} />
@@ -132,7 +142,11 @@ const RuntimeTraceSummaryPanel: React.FC<Props> = ({ analysis }) => {
         trace_error?.message.includes('JavaScript only')) && (
         <div className="mt-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4">
           <p className="text-sm text-indigo-300">
-            Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.
+            {trace_error?.code === 'JAVA_RUNTIME_TRACE_UNSUPPORTED' 
+              ? 'Java runtime tracing is not available yet. Static complexity analysis is available.'
+              : trace_error?.message?.includes('Python runtime tracing is currently disabled')
+              ? 'Python runtime tracing is currently disabled. Static complexity analysis is available.'
+              : 'Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.'}
           </p>
         </div>
       )}

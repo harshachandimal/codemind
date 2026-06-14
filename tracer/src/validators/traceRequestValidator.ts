@@ -89,8 +89,8 @@ export function validateTraceRequest(value: unknown): TraceRequest {
   }
 
   // ── 2. language ───────────────────────────────────────────────────────────
-  if (value['language'] !== 'javascript') {
-    addError(details, 'language', 'Only JavaScript tracing is supported.');
+  if (value['language'] !== 'javascript' && value['language'] !== 'python') {
+    addError(details, 'language', 'Only JavaScript and Python tracing are supported.');
   }
 
   // ── 3. sourceCode ─────────────────────────────────────────────────────────
@@ -154,7 +154,7 @@ export function validateTraceRequest(value: unknown): TraceRequest {
   // sourceCode is guaranteed to be a non-empty string at this point.
   // It is returned as-is — we do NOT modify, sanitize, or parse it here.
   return {
-    language: 'javascript',
+    language: value['language'] as 'javascript' | 'python',
     sourceCode: sourceCode as string,
     ...(typeof entryFunction === 'string' && { entryFunction }),
     ...(Array.isArray(input) && { input }),
