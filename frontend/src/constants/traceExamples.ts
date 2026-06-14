@@ -193,23 +193,86 @@ export const TRACE_EXAMPLES: TraceExample[] = [
     ],
   },
   {
-    id: 'python-linear-loop',
-    title: 'Python Linear Loop',
-    description: 'A Python for loop that runs n times.',
+    id: 'python-basic-add',
+    title: 'Python Basic Add',
+    description: 'A simple function that adds two numbers.',
+    category: 'basics',
+    language: 'python',
+    sourceCode: `def add(a, b):
+    result = a + b
+    return result`,
+    entryFunction: 'add',
+    input: [2, 3],
+    expectedResult: 5,
+    learningPoints: [
+      'Parameters are bound to input values.',
+      'The assignment stores the sum.',
+      'The return statement returns the final value.',
+      'Time complexity is O(1).'
+    ],
+  },
+  {
+    id: 'python-if-else',
+    title: 'Python If Else Check',
+    description: 'A basic branch that returns different strings based on the input.',
+    category: 'branches',
+    language: 'python',
+    sourceCode: `def check_number(n):
+    if n > 0:
+        return "positive"
+    elif n < 0:
+        return "negative"
+    else:
+        return "zero"`,
+    entryFunction: 'check_number',
+    input: [5],
+    expectedResult: 'positive',
+    learningPoints: [
+      'The condition n > 0 is evaluated first.',
+      'Only one branch is executed.',
+      'Time complexity is O(1).'
+    ],
+  },
+  {
+    id: 'python-for-loop-sum',
+    title: 'Python For Loop Sum',
+    description: 'Iterates through a range using a for loop to calculate the sum.',
     category: 'loops',
     language: 'python',
-    sourceCode: `def total(n):
-    result = 0
+    sourceCode: `def sum_range(n):
+    total = 0
     for i in range(n):
-        result += i
-    return result`,
-    entryFunction: 'total',
+        total += i
+    return total`,
+    entryFunction: 'sum_range',
     input: [5],
     expectedResult: 10,
     learningPoints: [
       'The loop runs n times.',
-      'Static time complexity is O(n).',
-      'Python runtime tracing is experimental and may be disabled depending on server settings.'
+      'Each iteration updates total.',
+      'Time complexity is O(n).'
+    ],
+  },
+  {
+    id: 'python-while-loop-sum',
+    title: 'Python While Loop Sum',
+    description: 'Iterates using a while loop to calculate the sum.',
+    category: 'loops',
+    language: 'python',
+    sourceCode: `def sum_while(n):
+    i = 0
+    total = 0
+    while i < n:
+        total += i
+        i += 1
+    return total`,
+    entryFunction: 'sum_while',
+    input: [5],
+    expectedResult: 10,
+    learningPoints: [
+      'The while condition is checked before each iteration.',
+      'i increases each time, so the loop terminates safely.',
+      'Time complexity is O(n).'
     ],
   },
   {
@@ -228,15 +291,36 @@ export const TRACE_EXAMPLES: TraceExample[] = [
     input: [3],
     expectedResult: 9,
     learningPoints: [
-      'Outer loop runs n times.',
-      'Inner loop runs n times for each outer iteration.',
+      'The outer loop runs n times.',
+      'The inner loop runs n times for each outer loop iteration.',
       'Total work is n × n.',
-      'Static complexity is O(n²).'
+      'Time complexity is O(n²).'
     ],
   },
   {
-    id: 'python-recursion',
-    title: 'Python Recursion',
+    id: 'python-list-sum',
+    title: 'Python List Sum',
+    description: 'Iterates through a list to calculate the sum.',
+    category: 'arrays',
+    language: 'python',
+    sourceCode: `def sum_list(arr):
+    total = 0
+    for i in range(len(arr)):
+        total += arr[i]
+    return total`,
+    entryFunction: 'sum_list',
+    input: [[1, 2, 3, 4]],
+    expectedResult: 10,
+    learningPoints: [
+      'len(arr) gives the list length.',
+      'arr[i] reads one item from the list.',
+      'The loop visits each item once.',
+      'Time complexity is O(n).'
+    ],
+  },
+  {
+    id: 'python-factorial-recursion',
+    title: 'Python Factorial Recursion',
     description: 'Calculates the factorial of a number using simple self-recursion.',
     category: 'recursion',
     language: 'python',
@@ -248,9 +332,10 @@ export const TRACE_EXAMPLES: TraceExample[] = [
     input: [4],
     expectedResult: 24,
     learningPoints: [
-      'The function calls itself.',
-      'Static analyzer detects recursion.',
-      'Runtime tracing for Python is not available yet.'
+      'The function calls itself with n - 1.',
+      'The base case stops recursion.',
+      'The call stack grows until the base case is reached.',
+      'Time complexity is O(n).'
     ],
   },
   {

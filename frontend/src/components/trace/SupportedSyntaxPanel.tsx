@@ -55,6 +55,9 @@ const SupportedSyntaxPanel: React.FC<SupportedSyntaxPanelProps> = ({ compact }) 
             <li><span className="text-indigo-400">✓</span> Runtime trace: experimental, requires runtime flags</li>
             <li><span className="text-indigo-400">✓</span> for/while loops, nested loops, recursion detection supported</li>
           </ul>
+          <p className="text-[10px] text-indigo-200/50 mt-1">
+            Python examples are available for: basics, branches, loops, nested loops, lists, and recursion.
+          </p>
         </div>
 
         {/* Java Section */}
