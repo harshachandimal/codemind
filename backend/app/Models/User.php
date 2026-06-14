@@ -36,4 +36,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Analysis::class);
     }
+
+    public function settings(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(UserSetting::class);
+    }
 }

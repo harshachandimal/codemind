@@ -7,6 +7,7 @@ import DashboardPage from '../pages/DashboardPage';
 import AnalyzerPage from '../pages/AnalyzerPage';
 import HistoryPage from '../pages/HistoryPage';
 import SharedAnalysisPage from '../pages/SharedAnalysisPage';
+import SettingsPage from '../pages/SettingsPage';
 import ProtectedRoute from './ProtectedRoute';
 
 const AppRoutes = () => {
@@ -27,6 +28,7 @@ const AppRoutes = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/analyzer" element={<AnalyzerPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

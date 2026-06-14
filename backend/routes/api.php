@@ -86,6 +86,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/analytics', [DashboardAnalyticsController::class, 'show']);
+
+    // User Settings
+    Route::get('/user/settings', [\App\Http\Controllers\Api\UserSettingsController::class, 'show']);
+    Route::patch('/user/settings', [\App\Http\Controllers\Api\UserSettingsController::class, 'update']);
 });
 
 /*

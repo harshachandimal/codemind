@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageShell from '../components/common/PageShell';
 import SectionHeader from '../components/common/SectionHeader';
 import CodeInputPanel from '../components/analyzer/CodeInputPanel';
@@ -9,6 +9,7 @@ import ExampleExpectationPanel from '../components/analyzer/ExampleExpectationPa
 import { TraceExample } from '../constants/traceExamples';
 import { Analysis } from '../types/analysis';
 import { createAnalysis } from '../services/analysisService';
+import { useUserSettings } from '../hooks/useUserSettings';
 
 const defaultCode = `function sum(arr) {
   let total = 0;
@@ -28,6 +29,17 @@ const AnalyzerPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeExample, setActiveExample] = useState<TraceExample | null>(null);
+  const [language, setLanguage] = useState<string>('javascript');
+  const [hasAppliedSettings, setHasAppliedSettings] = useState(false);
+
+  const { settings, isLoading: isLoadingSettings } = useUserSettings();
+
+  useEffect(() => {
+    if (!isLoadingSettings && !hasAppliedSettings) {
+      setLanguage(settings.default_language);
+      setHasAppliedSettings(true);
+    }
+  }, [isLoadingSettings, hasAppliedSettings, settings]);
 
   const handleSelectExample = (example: TraceExample) => {
     setActiveExample(example);
@@ -35,6 +47,7 @@ const AnalyzerPage: React.FC = () => {
     setSourceCode(example.sourceCode);
     setEntryFunction(example.entryFunction);
     setInputJson(JSON.stringify(example.input, null, 2));
+    setLanguage(example.language || 'javascript');
     setSuccessMessage(`Loaded example: ${example.title}`);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
@@ -62,7 +75,7 @@ const AnalyzerPage: React.FC = () => {
 
       const res = await createAnalysis({
         title: payload.title,
-        language: 'javascript',
+        language: language as any,
         source_code: payload.sourceCode,
         entryFunction: payload.entryFunction.trim() || null,
         input: parsedInput,
@@ -88,6 +101,7 @@ const AnalyzerPage: React.FC = () => {
     setEntryFunction(example.entryFunction);
     const inputStr = JSON.stringify(example.input, null, 2);
     setInputJson(inputStr);
+    setLanguage(example.language || 'javascript');
     setSuccessMessage(null);
     
     await submitAnalysisPayload({
@@ -125,12 +139,17 @@ const AnalyzerPage: React.FC = () => {
               onEntryFunctionChange={setEntryFunction}
               onInputJsonChange={setInputJson}
               onSubmit={handleSubmit}
+              editorFontSize={settings.editor_font_size}
+              language={language}
             />
             <SupportedSyntaxPanel compact={true} />
           </div>
           <div className="flex flex-col gap-8">
             <ExampleExpectationPanel example={activeExample} analysis={latestAnalysis} />
-            <AnalysisResultPanel analysis={latestAnalysis} />
+            <AnalysisResultPanel 
+              analysis={latestAnalysis} 
+              settings={settings}
+            />
           </div>
         </div>
       </div>

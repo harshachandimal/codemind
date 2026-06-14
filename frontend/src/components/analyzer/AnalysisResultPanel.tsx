@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Analysis } from '../../types/analysis';
+import type { UserSettings } from '../../types/settings';
 import { buildVisualExplanation } from '../../utils/visualizer';
 import AnalyzerEmptyState from './AnalyzerEmptyState';
 import AnalysisStaticNote from './AnalysisStaticNote';
@@ -16,9 +17,10 @@ type Props = {
   analysis: Analysis | null;
   /** When true, hides owner-only actions (export, share). Use on the public shared page. */
   readOnly?: boolean;
+  settings?: UserSettings;
 };
 
-const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false }) => {
+const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false, settings }) => {
   if (!analysis) return <AnalyzerEmptyState />;
 
   const visualModel = buildVisualExplanation(analysis);
@@ -50,14 +52,19 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false }) =>
       </div>
 
       {/* Complexity Lens — cards + detected pattern grid */}
-      <ComplexityLensPanel
-        complexityItems={visualModel.complexityItems}
-        patterns={visualModel.patterns}
-      />
-
-      {/* Recursion Stack Preview — only when recursion frames are present */}
-      {visualModel.recursionFrames.length > 0 && (
-        <RecursionStackPreview frames={visualModel.recursionFrames} />
+      {settings?.show_visual_explanations !== false ? (
+        <>
+          <ComplexityLensPanel
+            complexityItems={visualModel.complexityItems}
+            patterns={visualModel.patterns}
+          />
+          {/* Recursion Stack Preview — only when recursion frames are present */}
+          {visualModel.recursionFrames.length > 0 && (
+            <RecursionStackPreview frames={visualModel.recursionFrames} />
+          )}
+        </>
+      ) : (
+        <div className="text-xs text-white/40 italic">Visual explanations are hidden in your settings.</div>
       )}
 
       {/* Backend explanation text — preserved as additional context */}
@@ -73,17 +80,23 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false }) =>
       )}
 
 
-      {/* Runtime Trace Summary */}
-      <RuntimeTraceSummaryPanel analysis={analysis} />
+      {settings?.show_runtime_trace !== false ? (
+        <>
+          {/* Runtime Trace Summary */}
+          <RuntimeTraceSummaryPanel analysis={analysis} />
 
-      {/* Recursion Tree (renders only if recursive trace exists) */}
-      <RecursionTreePanel analysis={analysis} />
+          {/* Recursion Tree (renders only if recursive trace exists) */}
+          <RecursionTreePanel analysis={analysis} />
 
-      {/* Recursion Unwinding (renders only if recursive trace exists) */}
-      <RecursionUnwindPanel analysis={analysis} />
+          {/* Recursion Unwinding (renders only if recursive trace exists) */}
+          <RecursionUnwindPanel analysis={analysis} />
 
-      {/* Step-by-step execution timeline */}
-      <RuntimeTraceTimeline analysis={analysis} />
+          {/* Step-by-step execution timeline */}
+          <RuntimeTraceTimeline analysis={analysis} />
+        </>
+      ) : (
+        <div className="text-xs text-white/40 italic">Runtime trace is hidden in your settings.</div>
+      )}
 
       <AnalysisStaticNote />
     </div>

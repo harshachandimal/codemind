@@ -13,11 +13,14 @@ type Props = {
   onEntryFunctionChange: (v: string) => void;
   onInputJsonChange: (v: string) => void;
   onSubmit: () => void;
+  editorFontSize?: number;
+  language?: string;
 };
 
 const CodeInputPanel: React.FC<Props> = ({
   title, sourceCode, entryFunction, inputJson, loading, error,
-  onTitleChange, onSourceCodeChange, onEntryFunctionChange, onInputJsonChange, onSubmit
+  onTitleChange, onSourceCodeChange, onEntryFunctionChange, onInputJsonChange, onSubmit,
+  editorFontSize = 14, language = 'javascript'
 }) => {
   return (
     <Panel className="p-6 flex flex-col h-full gap-4">
@@ -35,13 +38,14 @@ const CodeInputPanel: React.FC<Props> = ({
       <div className="flex flex-col gap-1 flex-1">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-white/50 uppercase tracking-widest">Source Code</label>
-          <span className="text-xs text-indigo-400 font-medium">JavaScript</span>
+          <span className="text-xs text-indigo-400 font-medium capitalize">{language}</span>
         </div>
         <textarea
           value={sourceCode}
           onChange={e => onSourceCodeChange(e.target.value)}
           spellCheck={false}
-          className="flex-1 w-full bg-[#0d1117] border border-white/10 rounded-xl p-4 text-sm font-mono text-gray-300 focus:outline-none focus:border-indigo-500 transition-colors leading-relaxed min-h-[300px] resize-y"
+          style={{ fontSize: `${editorFontSize}px` }}
+          className="flex-1 w-full bg-[#0d1117] border border-white/10 rounded-xl p-4 font-mono text-gray-300 focus:outline-none focus:border-indigo-500 transition-colors leading-relaxed min-h-[300px] resize-y"
           placeholder="function sum(arr) { ... }"
         />
       </div>

@@ -9,6 +9,7 @@ import LatestAnalysesList from '../components/dashboard/LatestAnalysesList';
 import DashboardEmptyState from '../components/dashboard/DashboardEmptyState';
 import { getDashboardAnalytics } from '../services/dashboardService';
 import type { DashboardAnalyticsData } from '../types/dashboard';
+import { useUserSettings } from '../hooks/useUserSettings';
 
 const DashboardPage = () => {
   const { user, logout } = useAuth();
@@ -17,6 +18,9 @@ const DashboardPage = () => {
   const [analytics, setAnalytics] = useState<DashboardAnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { settings } = useUserSettings();
+  const isCompact = settings?.dashboard_density === 'compact';
 
   const loadAnalytics = useCallback(() => {
     setIsLoading(true);
@@ -46,6 +50,12 @@ const DashboardPage = () => {
         <div className="flex items-center gap-4">
           <span className="text-xs text-white/40">{user?.email}</span>
           <button
+            onClick={() => navigate('/settings')}
+            className="text-sm font-medium text-white/60 hover:text-white px-2 py-2 rounded-lg transition-all duration-200"
+          >
+            Settings
+          </button>
+          <button
             onClick={handleLogout}
             className="text-sm font-medium text-white/60 hover:text-white border border-white/10 hover:border-white/20 px-4 py-2 rounded-lg transition-all duration-200"
           >
@@ -55,7 +65,7 @@ const DashboardPage = () => {
       </nav>
 
       {/* Content */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-12 space-y-10">
+      <main className={`flex-1 w-full max-w-6xl mx-auto px-6 ${isCompact ? 'py-6 space-y-6' : 'py-12 space-y-10'}`}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
           <div>
@@ -111,7 +121,7 @@ const DashboardPage = () => {
             {/* Summary cards */}
             <section>
               <p className="text-xs font-semibold tracking-widest text-white/30 uppercase mb-4">Overview</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 ${isCompact ? 'gap-3' : 'gap-4'}`}>
                 <DashboardStatCard label="Total" value={analytics.summary.total_analyses} accent="indigo" />
                 <DashboardStatCard label="Completed" value={analytics.summary.completed_analyses} accent="emerald" />
                 <DashboardStatCard label="Failed" value={analytics.summary.failed_analyses} accent="rose" />
@@ -135,7 +145,7 @@ const DashboardPage = () => {
               <>
                 <section>
                   <p className="text-xs font-semibold tracking-widest text-white/30 uppercase mb-4">Breakdowns</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-3' : 'gap-4'}`}>
                     <DashboardVisualBarList title="Languages" items={analytics.language_breakdown} emptyMessage="No languages recorded yet." />
                     <DashboardVisualBarList title="Time Complexity" items={analytics.time_complexity_breakdown} emptyMessage="No complexity data yet." />
                     <DashboardVisualBarList title="Space Complexity" items={analytics.space_complexity_breakdown} emptyMessage="No complexity data yet." />
@@ -147,7 +157,7 @@ const DashboardPage = () => {
                 {/* Latest analyses */}
                 <section>
                   <p className="text-xs font-semibold tracking-widest text-white/30 uppercase mb-4">Recent Analyses</p>
-                  <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] shadow-xl shadow-black/30 backdrop-blur-sm p-6">
+                  <div className={`rounded-2xl border border-white/[0.07] bg-white/[0.03] shadow-xl shadow-black/30 backdrop-blur-sm ${isCompact ? 'p-4' : 'p-6'}`}>
                     <LatestAnalysesList analyses={analytics.latest_analyses} />
                   </div>
                 </section>
