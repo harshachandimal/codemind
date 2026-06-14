@@ -9,6 +9,7 @@ import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
 import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
 import RecursionTreePanel from '../trace/RecursionTreePanel';
 import RecursionUnwindPanel from '../trace/RecursionUnwindPanel';
+import AnalysisExportButtons from './AnalysisExportButtons';
 
 type Props = { analysis: Analysis | null };
 
@@ -28,11 +29,14 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis }) => {
             Status: <span className="text-indigo-400 capitalize">{analysis.status}</span>
           </p>
         </div>
-        {isStubbed && (
-          <span className="text-[10px] uppercase font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            Stubbed Result
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {isStubbed && (
+            <span className="text-[10px] uppercase font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              Stubbed Result
+            </span>
+          )}
+          <AnalysisExportButtons analysis={analysis} />
+        </div>
       </div>
 
       {/* Complexity Lens — cards + detected pattern grid */}

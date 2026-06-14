@@ -4,6 +4,8 @@ import {
   AnalysisResponseData,
   AnalysesListResponseData,
   CreateAnalysisPayload,
+  AnalysisExportFormat,
+  AnalysisExportData,
 } from '../types/analysis';
 
 export async function createAnalysis(
@@ -33,4 +35,16 @@ export async function deleteAnalysis(
 ): Promise<ApiResponse<Record<string, never>>> {
   const response = await apiClient.delete<ApiResponse<Record<string, never>>>(`/analyses/${id}`);
   return response.data;
+}
+
+export async function exportAnalysis(
+  analysisId: number | string,
+  format: AnalysisExportFormat
+): Promise<AnalysisExportData> {
+  const response = await apiClient.get<ApiResponse<AnalysisExportData>>(
+    `/analyses/${analysisId}/export`,
+    { params: { format } }
+  );
+  // response.data.data is the AnalysisExportData object from the backend
+  return response.data.data!;
 }

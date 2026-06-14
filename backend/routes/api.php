@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Analysis\AnalysisController;
+use App\Http\Controllers\Analysis\AnalysisExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/analyses', [AnalysisController::class, 'index']);
     Route::post('/analyses', [AnalysisController::class, 'store']);
+    Route::get('/analyses/{analysis}/export', [AnalysisExportController::class, 'show']);
     Route::get('/analyses/{analysis}', [AnalysisController::class, 'show']);
     Route::delete('/analyses/{analysis}', [AnalysisController::class, 'destroy']);
 });

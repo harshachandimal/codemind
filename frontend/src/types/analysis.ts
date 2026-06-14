@@ -83,3 +83,12 @@ export type AnalysisResponseData = {
 export type AnalysesListResponseData = {
   analyses: Analysis[];
 };
+
+export type AnalysisExportFormat = 'markdown' | 'json';
+
+export type AnalysisExportData = {
+  filename: string;
+  format: AnalysisExportFormat;
+  mime_type: string;
+  content: string;
+};

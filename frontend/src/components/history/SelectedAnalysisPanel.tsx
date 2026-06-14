@@ -6,6 +6,7 @@ import PatternBadgeList from '../analyzer/PatternBadgeList';
 import DeleteAnalysisButton from './DeleteAnalysisButton';
 import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
 import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
+import AnalysisExportButtons from '../analyzer/AnalysisExportButtons';
 
 type Props = {
   analysis: Analysis | null;
@@ -29,7 +30,10 @@ const SelectedAnalysisPanel: React.FC<Props> = ({ analysis, deleting, onDelete }
           <h2 className="text-lg font-bold text-white mb-1">{analysis.title || 'Untitled analysis'}</h2>
           <p className="text-sm text-white/40">Status: <span className="text-indigo-400 capitalize">{analysis.status}</span></p>
         </div>
-        <DeleteAnalysisButton loading={deleting} onDelete={onDelete} />
+        <div className="flex items-center gap-2 shrink-0">
+          <AnalysisExportButtons analysis={analysis} />
+          <DeleteAnalysisButton loading={deleting} onDelete={onDelete} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
