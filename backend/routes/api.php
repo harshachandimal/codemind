@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Analysis\AnalysisController;
 use App\Http\Controllers\Analysis\AnalysisExportController;
+use App\Http\Controllers\Api\AnalysisShareController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,5 +78,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/analyses/{analysis}/export', [AnalysisExportController::class, 'show']);
     Route::get('/analyses/{analysis}', [AnalysisController::class, 'show']);
     Route::delete('/analyses/{analysis}', [AnalysisController::class, 'destroy']);
+
+    // Share Routes
+    Route::post('/analyses/{analysis}/share', [AnalysisShareController::class, 'store']);
+    Route::delete('/analyses/{analysis}/share', [AnalysisShareController::class, 'destroy']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| Public Share Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/shared/analyses/{token}', [AnalysisShareController::class, 'show']);
 

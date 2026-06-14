@@ -92,3 +92,9 @@ export type AnalysisExportData = {
   mime_type: string;
   content: string;
 };
+
+export type AnalysisShareData = {
+  token: string;
+  share_url: string;
+  expires_at: string | null;
+};

@@ -7,6 +7,7 @@ import DeleteAnalysisButton from './DeleteAnalysisButton';
 import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
 import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
 import AnalysisExportButtons from '../analyzer/AnalysisExportButtons';
+import AnalysisShareButton from '../analyzer/AnalysisShareButton';
 
 type Props = {
   analysis: Analysis | null;
@@ -32,6 +33,7 @@ const SelectedAnalysisPanel: React.FC<Props> = ({ analysis, deleting, onDelete }
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <AnalysisExportButtons analysis={analysis} />
+          <AnalysisShareButton analysis={analysis} />
           <DeleteAnalysisButton loading={deleting} onDelete={onDelete} />
         </div>
       </div>

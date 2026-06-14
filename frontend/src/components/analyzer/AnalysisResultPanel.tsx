@@ -10,10 +10,15 @@ import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
 import RecursionTreePanel from '../trace/RecursionTreePanel';
 import RecursionUnwindPanel from '../trace/RecursionUnwindPanel';
 import AnalysisExportButtons from './AnalysisExportButtons';
+import AnalysisShareButton from './AnalysisShareButton';
 
-type Props = { analysis: Analysis | null };
+type Props = {
+  analysis: Analysis | null;
+  /** When true, hides owner-only actions (export, share). Use on the public shared page. */
+  readOnly?: boolean;
+};
 
-const AnalysisResultPanel: React.FC<Props> = ({ analysis }) => {
+const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false }) => {
   if (!analysis) return <AnalyzerEmptyState />;
 
   const visualModel = buildVisualExplanation(analysis);
@@ -35,7 +40,12 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis }) => {
               Stubbed Result
             </span>
           )}
-          <AnalysisExportButtons analysis={analysis} />
+          {!readOnly && (
+            <>
+              <AnalysisExportButtons analysis={analysis} />
+              <AnalysisShareButton analysis={analysis} />
+            </>
+          )}
         </div>
       </div>
 
@@ -81,3 +91,4 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis }) => {
 };
 
 export default AnalysisResultPanel;
+

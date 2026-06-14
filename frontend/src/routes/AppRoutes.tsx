@@ -6,6 +6,7 @@ import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
 import AnalyzerPage from '../pages/AnalyzerPage';
 import HistoryPage from '../pages/HistoryPage';
+import SharedAnalysisPage from '../pages/SharedAnalysisPage';
 import ProtectedRoute from './ProtectedRoute';
 
 const AppRoutes = () => {
@@ -16,6 +17,10 @@ const AppRoutes = () => {
         <Route path="/health" element={<HealthPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+
+        {/* Public shared analysis — no auth required */}
+        <Route path="/shared/analyses/:token" element={<SharedAnalysisPage />} />
+
 
         {/* Protected routes — require auth:sanctum token */}
         <Route element={<ProtectedRoute />}>

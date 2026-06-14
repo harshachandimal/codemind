@@ -1,11 +1,13 @@
 import apiClient from './apiClient';
 import { ApiResponse } from '../types/api';
 import {
+  Analysis,
   AnalysisResponseData,
   AnalysesListResponseData,
   CreateAnalysisPayload,
   AnalysisExportFormat,
   AnalysisExportData,
+  AnalysisShareData,
 } from '../types/analysis';
 
 export async function createAnalysis(
@@ -48,3 +50,29 @@ export async function exportAnalysis(
   // response.data.data is the AnalysisExportData object from the backend
   return response.data.data!;
 }
+
+export async function createAnalysisShare(
+  analysisId: number | string,
+  expiresInDays?: number
+): Promise<AnalysisShareData> {
+  const body = expiresInDays !== undefined ? { expires_in_days: expiresInDays } : {};
+  const response = await apiClient.post<ApiResponse<AnalysisShareData>>(
+    `/analyses/${analysisId}/share`,
+    body
+  );
+  return response.data.data!;
+}
+
+export async function revokeAnalysisShare(
+  analysisId: number | string
+): Promise<void> {
+  await apiClient.delete(`/analyses/${analysisId}/share`);
+}
+
+export async function getSharedAnalysis(token: string): Promise<Analysis> {
+  const response = await apiClient.get<ApiResponse<Analysis>>(
+    `/shared/analyses/${token}`
+  );
+  return response.data.data!;
+}
+
