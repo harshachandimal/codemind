@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Analysis\AnalysisController;
 use App\Http\Controllers\Analysis\AnalysisExportController;
 use App\Http\Controllers\Api\AnalysisShareController;
+use App\Http\Controllers\Api\DashboardAnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Share Routes
     Route::post('/analyses/{analysis}/share', [AnalysisShareController::class, 'store']);
     Route::delete('/analyses/{analysis}/share', [AnalysisShareController::class, 'destroy']);
+
+    // Dashboard
+    Route::get('/dashboard/analytics', [DashboardAnalyticsController::class, 'show']);
 });
 
 /*
