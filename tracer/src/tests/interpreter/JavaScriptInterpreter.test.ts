@@ -973,4 +973,198 @@ function odd(n) {
     expect(declSteps.length).toBeGreaterThan(0);
     expect(declSteps[0]?.variables['n']).not.toBe(declSteps[1]?.variables['n']);
   });
+
+  // ── Nested Loop Tests (Step 14.1) ─────────────────────────────────────────
+
+  it('interprets_nested_for_loop_counter', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function countPairs(n) {
+  let count = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      count = count + 1;
+    }
+  }
+  return count;
+}`,
+      entryFunction: 'countPairs',
+      input: [3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(9);
+
+    const types = result.steps.map((s) => s.type);
+    // Both outer and inner loops produce loop_start steps
+    const loopStarts = types.filter((t) => t === 'loop_start');
+    expect(loopStarts.length).toBeGreaterThanOrEqual(2);
+    expect(types).toContain('loop_iteration');
+
+    // Final return must be 9
+    const returnSteps = result.steps.filter((s) => s.type === 'return');
+    const lastReturn = returnSteps[returnSteps.length - 1];
+    expect(lastReturn?.variables['count']).toBe(9);
+  });
+
+  it('interprets_nested_while_loop_counter', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function countWhile(n) {
+  let count = 0;
+  let i = 0;
+  while (i < n) {
+    let j = 0;
+    while (j < n) {
+      count = count + 1;
+      j++;
+    }
+    i++;
+  }
+  return count;
+}`,
+      entryFunction: 'countWhile',
+      input: [3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(9);
+
+    const types = result.steps.map((s) => s.type);
+    const loopStarts = types.filter((t) => t === 'loop_start');
+    // Outer (1) + inner (3 times) = 4 loop_start events
+    expect(loopStarts.length).toBeGreaterThanOrEqual(2);
+    expect(types).toContain('loop_iteration');
+  });
+
+  it('interprets_mixed_for_while_nested_loop', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function mixed(n) {
+  let count = 0;
+  for (let i = 0; i < n; i++) {
+    let j = 0;
+    while (j < n) {
+      count = count + 1;
+      j++;
+    }
+  }
+  return count;
+}`,
+      entryFunction: 'mixed',
+      input: [2],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(4);
+  });
+
+  it('return_inside_inner_loop_bubbles_out', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function firstPair(n) {
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      return i + j;
+    }
+  }
+  return -1;
+}`,
+      entryFunction: 'firstPair',
+      input: [3],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(0); // i=0, j=0 → 0+0=0
+    expect(result.finalState.callStack).toHaveLength(0);
+
+    // loopDepth must be restored to 0
+    expect(result.finalState.loopDepth).toBe(0);
+  });
+
+  it('enforces_max_loop_depth', () => {
+    // Build a source with 6 nested for loops (exceeds maxLoopDepth of 5)
+    const src = `function deep(n) {
+  let c = 0;
+  for (let a = 0; a < n; a++) {
+    for (let b = 0; b < n; b++) {
+      for (let c2 = 0; c2 < n; c2++) {
+        for (let d = 0; d < n; d++) {
+          for (let e = 0; e < n; e++) {
+            for (let f = 0; f < n; f++) {
+              c = c + 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  return c;
+}`;
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: src,
+        entryFunction: 'deep',
+        input: [2],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    expect(error.code).toBe('MAX_LOOP_DEPTH_EXCEEDED');
+  });
+
+  it('enforces_max_steps_for_large_nested_loops', () => {
+    let error: any;
+    try {
+      interpreter.interpret({
+        language: 'javascript',
+        sourceCode: `function huge(n) {
+  let count = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      count = count + 1;
+    }
+  }
+  return count;
+}`,
+        entryFunction: 'huge',
+        input: [1000000],
+      });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeInstanceOf(TraceInterpreterError);
+    // Either max steps or max loop iterations will trigger first — both are safe
+    expect(['MAX_STEPS_EXCEEDED', 'MAX_LOOP_ITERATIONS_EXCEEDED']).toContain(error.code);
+  });
+
+  it('matrix_sum_with_nested_array_reads', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function matrixSum(matrix) {
+  let total = 0;
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix[i].length; j++) {
+      total = total + matrix[i][j];
+    }
+  }
+  return total;
+}`,
+      entryFunction: 'matrixSum',
+      input: [[[1, 2, 3], [4, 5, 6]]],
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.finalState.returnedValue).toBe(21);
+
+    const types = result.steps.map((s) => s.type);
+    expect(types).toContain('array_read');
+    expect(types).toContain('loop_iteration');
+  });
 });
+

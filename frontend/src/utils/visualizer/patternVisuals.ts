@@ -21,8 +21,20 @@ export const KNOWN_PATTERN_MAP: Record<
   nested_loop: {
     label: 'Nested Loop',
     description:
-      'A loop appears inside another loop, which often leads to quadratic growth.',
+      'A loop appears inside another loop. The analyzer detected loops nested at least 2 levels deep, which often leads to quadratic or higher complexity growth.',
     tone: 'warning',
+  },
+  loop_depth_2: {
+    label: 'Loop Depth: 2',
+    description:
+      'Two levels of loop nesting were detected. For each outer iteration, an inner loop may repeat n times, leading to O(n²) growth.',
+    tone: 'warning',
+  },
+  loop_depth_3: {
+    label: 'Loop Depth: 3',
+    description:
+      'Three levels of loop nesting were detected. The estimated time complexity is O(n³).',
+    tone: 'danger',
   },
   logarithmic_loop: {
     label: 'Logarithmic Loop',

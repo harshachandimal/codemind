@@ -15,12 +15,19 @@ class ComplexityEstimatorService
 
         $normalizedSource = $this->normalizeSource($sourceCode);
 
-        if ($this->containsNestedLoop($normalizedSource)) {
+        // ── Nested loop detection (depth-aware) ──────────────────────────────
+        $loopDepth = $this->detectMaxLoopNestingDepth($normalizedSource);
+
+        if ($loopDepth >= 2) {
+            $timeComplexity = $this->formatPolynomialComplexity($loopDepth);
+            $patterns       = ['nested_loop', 'loop_depth_' . $loopDepth];
+            $explanation    = $this->buildNestedLoopExplanation($loopDepth, $timeComplexity);
+
             return new ComplexityAnalysisResult(
-                timeComplexity: 'O(n²)',
+                timeComplexity: $timeComplexity,
                 spaceComplexity: 'O(1)',
-                detectedPatterns: ['nested_loop'],
-                explanation: 'This code appears to contain a loop inside another loop. For an input of size n, the inner loop may run for each outer loop iteration, so the estimated time complexity is O(n²). The analyzer did not detect additional data structures that grow with input size, so space is estimated as O(1).'
+                detectedPatterns: $patterns,
+                explanation: $explanation
             );
         }
 
@@ -63,7 +70,7 @@ class ComplexityEstimatorService
             );
         }
 
-        if ($this->containsLoop($normalizedSource)) {
+        if ($loopDepth === 1) {
             return new ComplexityAnalysisResult(
                 timeComplexity: 'O(n)',
                 spaceComplexity: 'O(1)',
@@ -78,6 +85,100 @@ class ComplexityEstimatorService
             detectedPatterns: ['constant_operations'],
             explanation: 'This code does not contain loops or recursive calls detected by the current analyzer, so it is estimated as constant time and constant space.'
         );
+    }
+
+    /**
+     * Returns the maximum loop nesting depth found in the source code.
+     *
+     * Returns:
+     *   0  — no loops detected
+     *   1  — one or more sequential (non-nested) loops
+     *   2  — at least one loop nested inside another loop
+     *   3+ — deeper nesting levels
+     *
+     * Algorithm: scan tokens (loop keywords and braces), maintain a stack of
+     * "is this brace the opening of a loop body?" booleans. At any point the
+     * number of true values on the stack is the current loop nesting depth.
+     *
+     * Sequential loops count as depth 1 because when the second loop begins
+     * the first loop's brace has already been popped from the stack.
+     */
+    private function detectMaxLoopNestingDepth(string $sourceCode): int
+    {
+        $cleanSource = $this->removeStringsAndComments($sourceCode);
+
+        // Extract all loop keywords and braces as an ordered token list.
+        preg_match_all('/\b(for|while)\b|[{}]/', $cleanSource, $matches);
+
+        $stack             = [];   // each entry: bool — is this brace a loop body?
+        $expectingLoopBody = false;
+        $maxDepth          = 0;
+
+        foreach ($matches[0] as $token) {
+            if ($token === 'for' || $token === 'while') {
+                $expectingLoopBody = true;
+            } elseif ($token === '{') {
+                $isLoopBody        = $expectingLoopBody;
+                $stack[]           = $isLoopBody;
+                $expectingLoopBody = false;
+
+                if ($isLoopBody) {
+                    // Current nesting depth = number of true values on the stack.
+                    $currentDepth = count(array_filter($stack));
+                    if ($currentDepth > $maxDepth) {
+                        $maxDepth = $currentDepth;
+                    }
+                }
+            } elseif ($token === '}') {
+                if (!empty($stack)) {
+                    array_pop($stack);
+                }
+                $expectingLoopBody = false;
+            }
+        }
+
+        return $maxDepth;
+    }
+
+    /**
+     * Formats O(n), O(n²), O(n³) or O(n^k) for deeper nesting.
+     */
+    private function formatPolynomialComplexity(int $depth): string
+    {
+        return match ($depth) {
+            1       => 'O(n)',
+            2       => 'O(n²)',
+            3       => 'O(n³)',
+            default => 'O(n^' . $depth . ')',
+        };
+    }
+
+    /**
+     * Builds an educational explanation for nested loop complexity.
+     */
+    private function buildNestedLoopExplanation(int $depth, string $timeComplexity): string
+    {
+        $depthWord = match ($depth) {
+            2       => 'two',
+            3       => 'three',
+            default => $depth,
+        };
+
+        $explanation  = "The analyzer detected loops nested {$depthWord} levels deep. ";
+        $explanation .= "For each iteration of the outer loop, an inner loop may process the input again. ";
+
+        if ($depth === 2) {
+            $explanation .= "For an input of size n, the total number of operations can grow proportionally to n × n. ";
+        } elseif ($depth === 3) {
+            $explanation .= "For an input of size n, the total number of operations can grow proportionally to n × n × n. ";
+        } else {
+            $explanation .= "For an input of size n, the total number of operations can grow proportionally to n raised to the power {$depth}. ";
+        }
+
+        $explanation .= "The estimated time complexity is therefore {$timeComplexity}. ";
+        $explanation .= "The analyzer did not detect additional data structures that grow with input size, so space is estimated as O(1).";
+
+        return $explanation;
     }
 
     /**
@@ -257,7 +358,7 @@ class ComplexityEstimatorService
     {
         $cleanSource = $this->removeStringsAndComments($sourceCode);
 
-        if (!$this->containsLoop($cleanSource)) {
+        if ($this->detectMaxLoopNestingDepth($cleanSource) === 0) {
             return false;
         }
 
@@ -274,40 +375,6 @@ class ComplexityEstimatorService
         }
 
         return false;
-    }
-
-    private function containsNestedLoop(string $sourceCode): bool
-    {
-        $cleanSource = $this->removeStringsAndComments($sourceCode);
-        preg_match_all('/\b(for|while)\b|[{}]/', $cleanSource, $matches);
-
-        $stack = [];
-        $expectingBlockForLoop = false;
-
-        foreach ($matches[0] as $token) {
-            if ($token === 'for' || $token === 'while') {
-                foreach ($stack as $isLoopBlock) {
-                    if ($isLoopBlock) {
-                        return true;
-                    }
-                }
-                $expectingBlockForLoop = true;
-            } elseif ($token === '{') {
-                $stack[] = $expectingBlockForLoop;
-                $expectingBlockForLoop = false;
-            } elseif ($token === '}') {
-                array_pop($stack);
-                $expectingBlockForLoop = false;
-            }
-        }
-
-        return false;
-    }
-
-    private function containsLoop(string $sourceCode): bool
-    {
-        $cleanSource = $this->removeStringsAndComments($sourceCode);
-        return preg_match('/\b(for|while)\b/', $cleanSource) === 1;
     }
 
     private function removeStringsAndComments(string $sourceCode): string

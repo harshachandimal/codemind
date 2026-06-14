@@ -30,4 +30,7 @@ export const TRACE_LIMITS = {
 
   /** Maximum elements allowed in a tracked array structure. */
   maxArrayLength: 1000,
+
+  /** Maximum nesting depth of loops (for inside for, while inside while, etc.). */
+  maxLoopDepth: 5,
 } as const;

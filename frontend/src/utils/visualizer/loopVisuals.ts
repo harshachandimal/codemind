@@ -10,24 +10,26 @@ export function buildLoopSteps(patterns: string[] | null): LoopPreviewStep[] {
   if (!patterns) return [];
 
   if (patterns.includes('nested_loop')) {
+    const isTriple = patterns.includes('loop_depth_3');
+    const depthLabel = isTriple ? 'three' : 'two';
+    const complexityLabel = isTriple ? 'O(n³)' : 'O(n²)';
+
     return [
       {
         id: 'loop-step-1',
         label: 'Outer Loop Begins',
-        description:
-          'The outer loop starts iterating over the input. Each outer iteration triggers a full inner loop run.',
+        description: `The outer loop starts iterating over the input. The analyzer detected loops nested ${depthLabel} levels deep.`,
       },
       {
         id: 'loop-step-2',
         label: 'Inner Loop Runs',
         description:
-          'For each step of the outer loop, the inner loop may process the entire input again.',
+          'For each step of the outer loop, the inner loop may process the entire input again — multiplying the total work.',
       },
       {
         id: 'loop-step-3',
-        label: 'Quadratic Growth',
-        description:
-          'Total work can grow quadratically — doubling the input may multiply the work by four.',
+        label: `${isTriple ? 'Cubic' : 'Quadratic'} Growth (${complexityLabel})`,
+        description: `Total work grows as n raised to the power ${depthLabel === 'two' ? '2' : '3'}. Doubling the input size ${isTriple ? 'multiplies work by eight' : 'multiplies work by four'}.`,
       },
     ];
   }

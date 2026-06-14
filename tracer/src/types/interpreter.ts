@@ -46,6 +46,8 @@ export type InterpreterState = {
   variables: VariableStore;
   callStack: CallFrame[];
   returnedValue: RuntimeValue | undefined;
+  /** Current nesting depth of loops. Incremented on loop entry, decremented on exit. */
+  loopDepth: number;
 };
 
 /**
@@ -55,6 +57,7 @@ export type InterpreterOptions = {
   maxSteps: number;
   maxLoopIterations: number;
   maxCallDepth: number;
+  maxLoopDepth: number;
   timeoutMs: number;
 };
 

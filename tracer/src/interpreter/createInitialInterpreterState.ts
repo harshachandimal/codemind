@@ -11,5 +11,6 @@ export function createInitialInterpreterState(): InterpreterState {
     variables: {},
     callStack: [],
     returnedValue: undefined,
+    loopDepth: 0,
   };
 }

@@ -155,4 +155,128 @@ JS;
 
         $this->service->estimate('print("hello")', 'python');
     }
+
+    // ── Nested Loop Depth Tests (Phase 14 Step 14.2) ─────────────────────────
+
+    public function test_detects_nested_for_loop_as_quadratic(): void
+    {
+        $source = <<<'JS'
+function countPairs(n) {
+  let count = 0;
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      count = count + 1;
+    }
+  }
+
+  return count;
 }
+JS;
+
+        $result = $this->service->estimate($source);
+
+        $this->assertEquals('O(n²)', $result->timeComplexity);
+        $this->assertEquals('O(1)', $result->spaceComplexity);
+        $this->assertContains('nested_loop', $result->detectedPatterns);
+        $this->assertStringContainsStringIgnoringCase('two', $result->explanation);
+        $this->assertStringContainsStringIgnoringCase('nested', $result->explanation);
+    }
+
+    public function test_detects_mixed_for_while_nested_loop_as_quadratic(): void
+    {
+        $source = <<<'JS'
+function mixed(n) {
+  let count = 0;
+
+  for (let i = 0; i < n; i++) {
+    let j = 0;
+
+    while (j < n) {
+      count = count + 1;
+      j++;
+    }
+  }
+
+  return count;
+}
+JS;
+
+        $result = $this->service->estimate($source);
+
+        $this->assertEquals('O(n²)', $result->timeComplexity);
+        $this->assertContains('nested_loop', $result->detectedPatterns);
+    }
+
+    public function test_does_not_treat_sequential_loops_as_nested(): void
+    {
+        $source = <<<'JS'
+function sequential(n) {
+  let a = 0;
+
+  for (let i = 0; i < n; i++) {
+    a = a + 1;
+  }
+
+  for (let j = 0; j < n; j++) {
+    a = a + 1;
+  }
+
+  return a;
+}
+JS;
+
+        $result = $this->service->estimate($source);
+
+        $this->assertEquals('O(n)', $result->timeComplexity);
+        $this->assertNotContains('nested_loop', $result->detectedPatterns);
+        $this->assertContains('single_loop', $result->detectedPatterns);
+    }
+
+    public function test_detects_triple_nested_loop_as_cubic(): void
+    {
+        $source = <<<'JS'
+function tripleNested(n) {
+  let count = 0;
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      for (let k = 0; k < n; k++) {
+        count = count + 1;
+      }
+    }
+  }
+
+  return count;
+}
+JS;
+
+        $result = $this->service->estimate($source);
+
+        $this->assertEquals('O(n³)', $result->timeComplexity);
+        $this->assertContains('nested_loop', $result->detectedPatterns);
+        $this->assertContains('loop_depth_3', $result->detectedPatterns);
+        $this->assertStringContainsStringIgnoringCase('three', $result->explanation);
+    }
+
+    public function test_nested_loop_explanation_mentions_depth_and_complexity(): void
+    {
+        $source = <<<'JS'
+function pairs(n) {
+  let c = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      c = c + 1;
+    }
+  }
+  return c;
+}
+JS;
+
+        $result = $this->service->estimate($source);
+
+        $this->assertStringContainsStringIgnoringCase('O(n²)', $result->explanation);
+        $this->assertStringContainsStringIgnoringCase('nested', $result->explanation);
+    }
+}
+

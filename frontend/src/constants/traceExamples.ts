@@ -132,5 +132,65 @@ export const TRACE_EXAMPLES: TraceExample[] = [
       'Call stack growth',
       'Recursion unwinding'
     ],
+  },
+  {
+    id: 'nested-for-loop-pairs',
+    title: 'Nested For Loop',
+    description: 'Shows how nested loops multiply the number of iterations, producing O(n²) work.',
+    category: 'loops',
+    language: 'javascript',
+    sourceCode: `function countPairs(n) {
+  let count = 0;
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      count = count + 1;
+    }
   }
+
+  return count;
+}`,
+    entryFunction: 'countPairs',
+    input: [3],
+    expectedResult: 9,
+    learningPoints: [
+      'Outer loop runs n times',
+      'Inner loop runs n times for each outer iteration',
+      'Total work grows as n × n',
+      'Static complexity estimate is O(n²)',
+      'Runtime returned value for n = 3 is 9',
+    ],
+  },
+  {
+    id: 'mixed-for-while-nested',
+    title: 'Mixed For While Loop',
+    description: 'A for loop containing a while loop — still O(n²) because both loops scale with n.',
+    category: 'loops',
+    language: 'javascript',
+    sourceCode: `function mixed(n) {
+  let count = 0;
+
+  for (let i = 0; i < n; i++) {
+    let j = 0;
+
+    while (j < n) {
+      count = count + 1;
+      j++;
+    }
+  }
+
+  return count;
+}`,
+    entryFunction: 'mixed',
+    input: [2],
+    expectedResult: 4,
+    learningPoints: [
+      'for and while loops can be nested together',
+      'The outer for loop runs n times',
+      'The inner while loop runs n times per outer iteration',
+      'Total work is still n × n, so complexity is O(n²)',
+      'Runtime returned value for n = 2 is 4',
+    ],
+  },
 ];
+

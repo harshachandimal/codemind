@@ -10,5 +10,6 @@ describe('createInitialInterpreterState', () => {
     expect(state.variables).toEqual({});
     expect(state.callStack).toEqual([]);
     expect(state.returnedValue).toBeUndefined();
+    expect(state.loopDepth).toBe(0);
   });
 });

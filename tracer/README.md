@@ -213,7 +213,8 @@ The first runtime tracer implementation uses an **AST interpreter** rather than 
 - Basic `BinaryExpression`: `+`, `-`, `*`, `/`, `%`, `<`, `<=`, `>`, `>=`, `===`, `!==`
 - Simple `AssignmentExpression` and `UpdateExpression` (`i++`, `i--`)
 - `ForStatement` (simple numeric counters), `IfStatement`, `WhileStatement` (with strict maxLoopIterations limit)
-- `MemberExpression` for array indexing
+- **Nested loops**: `for` inside `for`, `while` inside `while`, mixed `for`/`while` nesting — protected by `maxLoopDepth`, `maxLoopIterations`, and `maxSteps`
+- `MemberExpression` for array indexing: `arr[i]`, `arr.length`, nested reads `matrix[i][j]`, `matrix[i].length`
 - `CallExpression` (calling the entry function, and self-recursion)
 
 **Unsupported MVP syntax (fails safely):**
@@ -222,9 +223,15 @@ The first runtime tracer implementation uses an **AST interpreter** rather than 
 - classes, `this`, `new`, closures, object methods
 - `try/catch`, generators, spread/rest, destructuring
 - Arbitrary function calls (e.g. helper functions, mutual recursion). Only self-recursion is supported with strict `maxCallDepth` protection.
+- `break`, `continue`, `for...of`, `for...in`
+- Complex loop mutations (array element assignment, object mutation)
+- Unbounded loop depth beyond `maxLoopDepth` (5 levels by default)
 
 **Safety Limits:**
-- Enforced: `maxSteps`, `timeoutMs`, `maxSourceLength`, `maxOutputBytes`, `maxLoopIterations`, `maxCallDepth`, `maxArrayLength`
+- Enforced: `maxSteps`, `timeoutMs`, `maxSourceLength`, `maxOutputBytes`, `maxLoopIterations`, `maxCallDepth`, `maxArrayLength`, `maxLoopDepth`
+- **`maxLoopDepth` (default 5)**: Limits nesting depth of loops. Attempting 6+ levels throws `MAX_LOOP_DEPTH_EXCEEDED`.
+- **`maxLoopIterations` (default 100)**: Limits iterations per individual loop. A nested `n×n` loop uses 100 outer + 100 inner iterations before hitting this limit.
+- **`maxSteps` (default 500)**: Caps total recorded trace steps across all loops.
 - The execution gate (`TRACER_EXECUTION_ENABLED`) remains disabled by default. No real execution is implemented yet.
 
 ## Runtime Execution Gate

@@ -47,6 +47,7 @@ describe('createTraceApiResponse', () => {
         status: 'returned',
         returnedValue: 42,
         stepCount: 10,
+        loopDepth: 0,
       },
     };
 

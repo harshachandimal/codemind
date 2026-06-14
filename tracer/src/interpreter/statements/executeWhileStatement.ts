@@ -6,6 +6,7 @@ import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { interpretBlock } from '../core/interpretBlock.js';
 import { getNodeLine } from '../core/getNodeLine.js';
 import { TRACE_LIMITS } from '../../config/traceLimits.js';
+import { assertLoopDepthAvailable } from '../assertLoopDepth.js';
 
 export function executeWhileStatement(
   stmt: WhileStatement,
@@ -19,57 +20,67 @@ export function executeWhileStatement(
     );
   }
 
-  const line = getNodeLine(stmt);
-  
-  env.recorder.record({
-    line,
-    type: 'loop_start',
-    description: 'While loop started.',
-  });
+  // ── Depth guard ──────────────────────────────────────────────────────────
+  assertLoopDepthAvailable(env.state);
+  env.state.loopDepth++;
 
+  const line = getNodeLine(stmt);
   let iterationCount = 0;
 
-  while (true) {
-    if (iterationCount >= TRACE_LIMITS.maxLoopIterations) {
-      throw new TraceInterpreterError(
-        `While loop exceeded maximum iterations (${TRACE_LIMITS.maxLoopIterations}) in function "${fnName}".`,
-        'MAX_LOOP_ITERATIONS_EXCEEDED',
-      );
-    }
-
-    const testValue = evaluateExpression(stmt.test, env, fnName);
-
-    if (typeof testValue !== 'boolean') {
-      throw new TraceInterpreterError(
-        `While loop condition must evaluate to a boolean in function "${fnName}".`,
-        'UNSUPPORTED_EXPRESSION',
-      );
-    }
-
-    if (!testValue) {
-      break;
-    }
-
-    iterationCount++;
+  try {
+    const depth = env.state.loopDepth;
 
     env.recorder.record({
       line,
-      type: 'loop_iteration',
-      description: `While loop iteration ${iterationCount} started.`,
+      type: 'loop_start',
+      description: `While loop started at depth ${depth}.`,
     });
 
-    const returnedValue = interpretBlock(stmt.body, env, fnName);
+    while (true) {
+      if (iterationCount >= TRACE_LIMITS.maxLoopIterations) {
+        throw new TraceInterpreterError(
+          `While loop exceeded maximum iterations (${TRACE_LIMITS.maxLoopIterations}) in function "${fnName}".`,
+          'MAX_LOOP_ITERATIONS_EXCEEDED',
+        );
+      }
 
-    if (env.state.status === 'returned') {
-      return returnedValue;
+      const testValue = evaluateExpression(stmt.test, env, fnName);
+
+      if (typeof testValue !== 'boolean') {
+        throw new TraceInterpreterError(
+          `While loop condition must evaluate to a boolean in function "${fnName}".`,
+          'UNSUPPORTED_EXPRESSION',
+        );
+      }
+
+      if (!testValue) {
+        break;
+      }
+
+      iterationCount++;
+
+      env.recorder.record({
+        line,
+        type: 'loop_iteration',
+        description: `While loop iteration ${iterationCount} started at depth ${depth}.`,
+      });
+
+      const returnedValue = interpretBlock(stmt.body, env, fnName);
+
+      if (env.state.status === 'returned') {
+        return returnedValue;
+      }
     }
+
+    env.recorder.record({
+      line,
+      type: 'loop_exit',
+      description: `While loop exited after ${iterationCount} iteration(s) at depth ${depth}.`,
+    });
+
+    return undefined;
+  } finally {
+    // Always restore depth, even if a return/error bubbles out of the loop.
+    env.state.loopDepth--;
   }
-
-  env.recorder.record({
-    line,
-    type: 'loop_exit',
-    description: `While loop exited after ${iterationCount} iteration(s).`,
-  });
-
-  return undefined;
 }
