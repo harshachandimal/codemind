@@ -1,8 +1,8 @@
 export type AnalysisStatus = 'pending' | 'completed' | 'failed';
 
-export type SupportedLanguage = 'javascript' | 'python';
+export type SupportedLanguage = 'javascript' | 'python' | 'java';
 
-export type TraceMode = 'planned' | 'executed' | 'error' | 'disabled' | null;
+export type TraceMode = 'planned' | 'executed' | 'error' | 'disabled' | 'unsupported_language' | null;
 
 export type TraceStep = {
   step: number;

@@ -15,12 +15,13 @@ type Props = {
   onSubmit: () => void;
   editorFontSize?: number;
   language?: string;
+  onLanguageChange?: (v: string) => void;
 };
 
 const CodeInputPanel: React.FC<Props> = ({
   title, sourceCode, entryFunction, inputJson, loading, error,
   onTitleChange, onSourceCodeChange, onEntryFunctionChange, onInputJsonChange, onSubmit,
-  editorFontSize = 14, language = 'javascript'
+  editorFontSize = 14, language = 'javascript', onLanguageChange
 }) => {
   return (
     <Panel className="p-6 flex flex-col h-full gap-4">
@@ -38,7 +39,15 @@ const CodeInputPanel: React.FC<Props> = ({
       <div className="flex flex-col gap-1 flex-1">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-white/50 uppercase tracking-widest">Source Code</label>
-          <span className="text-xs text-indigo-400 font-medium capitalize">{language}</span>
+          <select 
+            value={language}
+            onChange={e => onLanguageChange?.(e.target.value)}
+            className="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-xs text-indigo-400 font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+          </select>
         </div>
         <textarea
           value={sourceCode}

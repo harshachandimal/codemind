@@ -24,14 +24,31 @@ class StoreAnalysisAction
             $data['language']
         );
 
-        $traceRequest = new TraceRequestData(
-            language: $data['language'],
-            sourceCode: $data['source_code'],
-            entryFunction: $data['entryFunction'] ?? null,
-            input: $data['input'] ?? []
-        );
+        if (strtolower($data['language']) === 'javascript') {
+            $traceRequest = new TraceRequestData(
+                language: $data['language'],
+                sourceCode: $data['source_code'],
+                entryFunction: $data['entryFunction'] ?? null,
+                input: $data['input'] ?? []
+            );
 
-        $traceResponse = $this->tracerClient->trace($traceRequest);
+            $traceResponse = $this->tracerClient->trace($traceRequest);
+            $traceMode = $traceResponse->mode;
+            $traceSteps = $traceResponse->trace['steps'] ?? [];
+            $traceSummary = $traceResponse->trace['summary'] ?? null;
+            $traceResult = $traceResponse->result;
+            $tracePlan = $traceResponse->plan;
+            $traceError = $traceResponse->error;
+            $traceMetadata = $traceResponse->metadata;
+        } else {
+            $traceMode = 'unsupported_language';
+            $traceSteps = [];
+            $traceSummary = null;
+            $traceResult = null;
+            $tracePlan = null;
+            $traceError = 'Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.';
+            $traceMetadata = null;
+        }
 
         return Analysis::create([
             'user_id'           => $user->id,
@@ -43,13 +60,13 @@ class StoreAnalysisAction
             'space_complexity'  => $result->spaceComplexity,
             'detected_patterns' => $result->detectedPatterns,
             'explanation'       => $result->explanation,
-            'trace_mode'        => $traceResponse->mode,
-            'trace_steps'       => $traceResponse->trace['steps'] ?? [],
-            'trace_summary'     => $traceResponse->trace['summary'] ?? null,
-            'trace_result'      => $traceResponse->result,
-            'trace_plan'        => $traceResponse->plan,
-            'trace_error'       => $traceResponse->error,
-            'trace_metadata'    => $traceResponse->metadata,
+            'trace_mode'        => $traceMode,
+            'trace_steps'       => $traceSteps,
+            'trace_summary'     => $traceSummary,
+            'trace_result'      => $traceResult,
+            'trace_plan'        => $tracePlan,
+            'trace_error'       => $traceError,
+            'trace_metadata'    => $traceMetadata,
         ]);
     }
 }

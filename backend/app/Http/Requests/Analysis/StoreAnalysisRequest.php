@@ -23,7 +23,7 @@ class StoreAnalysisRequest extends FormRequest
     {
         return [
             'title' => ['nullable', 'string', 'max:255'],
-            'language' => ['required', 'string', 'in:javascript'],
+            'language' => ['required', 'string', 'in:javascript,python,java'],
             'source_code' => ['required', 'string', 'max:20000'],
             'entryFunction' => ['nullable', 'string', 'max:255'],
             'input' => ['nullable', 'array'],

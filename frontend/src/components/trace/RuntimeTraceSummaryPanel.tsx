@@ -31,6 +31,11 @@ const MODE_CONFIG: Record<
     pill: 'border-white/10 bg-white/[0.04] text-white/40',
     label: 'Disabled',
   },
+  unsupported_language: {
+    dot:  'bg-amber-400',
+    pill: 'border-amber-500/25 bg-amber-500/10 text-amber-300',
+    label: 'Unsupported',
+  },
 };
 
 function TraceModeChip({ mode }: { mode: TraceMode }) {
@@ -116,9 +121,19 @@ const RuntimeTraceSummaryPanel: React.FC<Props> = ({ analysis }) => {
       )}
 
       {/* Error */}
-      {trace_mode === 'error' && (
+      {trace_mode === 'error' && !trace_error?.message.includes('JavaScript only') && (
         <div className="mt-2">
           <TraceErrorState error={trace_error} />
+        </div>
+      )}
+
+      {/* Unsupported */}
+      {(['unsupported_language', 'unsupported', 'not_available'].includes(trace_mode as string) || 
+        trace_error?.message.includes('JavaScript only')) && (
+        <div className="mt-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4">
+          <p className="text-sm text-indigo-300">
+            Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.
+          </p>
         </div>
       )}
 

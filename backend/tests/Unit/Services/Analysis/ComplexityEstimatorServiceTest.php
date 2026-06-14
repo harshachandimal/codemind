@@ -153,7 +153,7 @@ JS;
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported language');
 
-        $this->service->estimate('print("hello")', 'python');
+        $this->service->estimate('puts "hello"', 'ruby');
     }
 
     // ── Nested Loop Depth Tests (Phase 14 Step 14.2) ─────────────────────────
@@ -278,5 +278,156 @@ JS;
         $this->assertStringContainsStringIgnoringCase('O(n²)', $result->explanation);
         $this->assertStringContainsStringIgnoringCase('nested', $result->explanation);
     }
-}
+    public function test_python_linear_loop_detected(): void
+    {
+        $source = <<<'PYTHON'
+def total(n):
+    result = 0
+    for i in range(n):
+        result += i
+    return result
+PYTHON;
 
+        $result = $this->service->estimate($source, 'python');
+
+        $this->assertEquals('O(n)', $result->timeComplexity);
+        $this->assertContains('loop', $result->detectedPatterns);
+        $this->assertNotContains('nested_loop', $result->detectedPatterns);
+    }
+
+    public function test_python_nested_loop_detected_as_quadratic(): void
+    {
+        $source = <<<'PYTHON'
+def count_pairs(n):
+    count = 0
+    for i in range(n):
+        for j in range(n):
+            count += 1
+    return count
+PYTHON;
+
+        $result = $this->service->estimate($source, 'python');
+
+        $this->assertEquals('O(n²)', $result->timeComplexity);
+        $this->assertContains('nested_loop', $result->detectedPatterns);
+    }
+
+    public function test_python_sequential_loops_not_nested(): void
+    {
+        $source = <<<'PYTHON'
+def seq(n):
+    for i in range(n):
+        pass
+    for j in range(n):
+        pass
+PYTHON;
+
+        $result = $this->service->estimate($source, 'python');
+
+        $this->assertEquals('O(n)', $result->timeComplexity);
+        $this->assertNotContains('nested_loop', $result->detectedPatterns);
+    }
+
+    public function test_python_recursion_detected(): void
+    {
+        $source = <<<'PYTHON'
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+PYTHON;
+
+        $result = $this->service->estimate($source, 'python');
+
+        $this->assertContains('recursion', $result->detectedPatterns);
+    }
+
+    public function test_java_linear_loop_detected(): void
+    {
+        $source = <<<'JAVA'
+public class Main {
+    public static int total(int n) {
+        int result = 0;
+        for (int i = 0; i < n; i++) {
+            result += i;
+        }
+        return result;
+    }
+}
+JAVA;
+
+        $result = $this->service->estimate($source, 'java');
+
+        $this->assertEquals('O(n)', $result->timeComplexity);
+        $this->assertContains('loop', $result->detectedPatterns);
+    }
+
+    public function test_java_nested_loop_detected_as_quadratic(): void
+    {
+        $source = <<<'JAVA'
+public class Main {
+    public static int pairs(int n) {
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                count++;
+            }
+        }
+        return count;
+    }
+}
+JAVA;
+
+        $result = $this->service->estimate($source, 'java');
+
+        $this->assertEquals('O(n²)', $result->timeComplexity);
+        $this->assertContains('nested_loop', $result->detectedPatterns);
+    }
+
+    public function test_java_sequential_loops_not_nested(): void
+    {
+        $source = <<<'JAVA'
+public class Main {
+    public static int seq(int n) {
+        int c = 0;
+        for (int i = 0; i < n; i++) {
+            c++;
+        }
+        for (int j = 0; j < n; j++) {
+            c++;
+        }
+        return c;
+    }
+}
+JAVA;
+
+        $result = $this->service->estimate($source, 'java');
+
+        $this->assertEquals('O(n)', $result->timeComplexity);
+        $this->assertNotContains('nested_loop', $result->detectedPatterns);
+    }
+
+    public function test_java_recursion_detected(): void
+    {
+        $source = <<<'JAVA'
+public class Main {
+    public static int factorial(int n) {
+        if (n <= 1) {
+            return 1;
+        }
+        return n * factorial(n - 1);
+    }
+}
+JAVA;
+
+        $result = $this->service->estimate($source, 'java');
+
+        $this->assertContains('recursion', $result->detectedPatterns);
+    }
+
+    public function test_invalid_language_rejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->service->estimate('puts "hello"', 'ruby');
+    }
+}

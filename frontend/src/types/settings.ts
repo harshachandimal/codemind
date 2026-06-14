@@ -1,6 +1,6 @@
 export type DashboardDensity = 'comfortable' | 'compact';
 
-export type DefaultLanguage = 'javascript' | 'python';
+export type DefaultLanguage = 'javascript' | 'python' | 'java';
 
 export type UserSettings = {
   default_language: DefaultLanguage;

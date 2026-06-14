@@ -23,7 +23,7 @@ class UpdateUserSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'default_language' => ['sometimes', 'string', 'in:javascript,python'],
+            'default_language' => ['sometimes', 'string', 'in:javascript,python,java'],
             'editor_font_size' => ['sometimes', 'integer', 'min:12', 'max:22'],
             'show_visual_explanations' => ['sometimes', 'boolean'],
             'show_runtime_trace' => ['sometimes', 'boolean'],

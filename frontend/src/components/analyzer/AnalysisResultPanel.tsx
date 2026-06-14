@@ -85,14 +85,19 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false, sett
           {/* Runtime Trace Summary */}
           <RuntimeTraceSummaryPanel analysis={analysis} />
 
-          {/* Recursion Tree (renders only if recursive trace exists) */}
-          <RecursionTreePanel analysis={analysis} />
+          {!['unsupported_language', 'unsupported', 'not_available'].includes(analysis.trace_mode as string) && 
+           !analysis.trace_error?.message.includes('JavaScript only') && (
+            <>
+              {/* Recursion Tree (renders only if recursive trace exists) */}
+              <RecursionTreePanel analysis={analysis} />
 
-          {/* Recursion Unwinding (renders only if recursive trace exists) */}
-          <RecursionUnwindPanel analysis={analysis} />
+              {/* Recursion Unwinding (renders only if recursive trace exists) */}
+              <RecursionUnwindPanel analysis={analysis} />
 
-          {/* Step-by-step execution timeline */}
-          <RuntimeTraceTimeline analysis={analysis} />
+              {/* Step-by-step execution timeline */}
+              <RuntimeTraceTimeline analysis={analysis} />
+            </>
+          )}
         </>
       ) : (
         <div className="text-xs text-white/40 italic">Runtime trace is hidden in your settings.</div>

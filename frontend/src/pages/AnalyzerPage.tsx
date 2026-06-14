@@ -117,7 +117,7 @@ const AnalyzerPage: React.FC = () => {
       <div className="w-full max-w-7xl mx-auto px-6 py-12">
         <SectionHeader 
           title="Code Analyzer" 
-          description="Submit your JavaScript code to detect patterns and calculate complexity." 
+          description="Submit your code to detect patterns and calculate complexity." 
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           <div className="flex flex-col gap-8">
@@ -141,6 +141,7 @@ const AnalyzerPage: React.FC = () => {
               onSubmit={handleSubmit}
               editorFontSize={settings.editor_font_size}
               language={language}
+              onLanguageChange={setLanguage}
             />
             <SupportedSyntaxPanel compact={true} />
           </div>

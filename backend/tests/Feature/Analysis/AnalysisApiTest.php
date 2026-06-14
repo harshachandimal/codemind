@@ -71,15 +71,15 @@ class AnalysisApiTest extends TestCase
             ->assertJsonValidationErrors(['language', 'source_code']);
     }
 
-    public function test_create_analysis_only_accepts_javascript_language()
+    public function test_create_analysis_rejects_unsupported_language()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
         $payload = [
-            'title' => 'Python script',
-            'language' => 'python',
-            'source_code' => 'print("hello")',
+            'title' => 'Ruby script',
+            'language' => 'ruby',
+            'source_code' => 'puts "hello"',
         ];
 
         $response = $this->postJson('/api/analyses', $payload);
@@ -320,5 +320,26 @@ class AnalysisApiTest extends TestCase
             
         // Assert no raw exceptions in the response message
         $this->assertStringNotContainsString('Connection failed', $response->json('message'));
+    }
+
+    public function test_python_and_java_do_not_call_tracer()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Python script',
+            'language'    => 'python',
+            'source_code' => 'print("hello")',
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'unsupported_language')
+            ->assertJsonPath('data.analysis.trace_error', 'Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.')
+            ->assertJsonPath('data.analysis.trace_steps', []);
+            
+        \Illuminate\Support\Facades\Http::assertNothingSent();
     }
 }
