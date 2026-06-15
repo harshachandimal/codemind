@@ -29,6 +29,22 @@ export function normalizeTraceSteps(rawSteps: unknown[]): TracePlayerStep[] {
 
       const returnedValue = stepRecord.returnedValue !== undefined ? stepRecord.returnedValue : undefined;
 
+      let lineNumber: number | null = null;
+      if (typeof stepRecord.lineNumber === 'number') {
+        lineNumber = stepRecord.lineNumber;
+      } else if (typeof stepRecord.line === 'number') {
+        lineNumber = stepRecord.line;
+      } else if (stepRecord.loc && typeof (stepRecord.loc as any).start?.line === 'number') {
+        lineNumber = (stepRecord.loc as any).start.line;
+      }
+
+      const operation = typeof stepRecord.operation === 'string' ? stepRecord.operation : null;
+      
+      let variableChanges: string[] = [];
+      if (Array.isArray(stepRecord.variableChanges)) {
+        variableChanges = stepRecord.variableChanges.filter((v): v is string => typeof v === 'string');
+      }
+
       return {
         id: `step-${index}-${Date.now()}`,
         index,
@@ -38,6 +54,9 @@ export function normalizeTraceSteps(rawSteps: unknown[]): TracePlayerStep[] {
         variables,
         callStack,
         returnedValue,
+        lineNumber,
+        operation,
+        variableChanges,
         rawStep,
       };
     } catch (e) {

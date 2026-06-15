@@ -8,7 +8,7 @@ export const TraceCallStackPanel: React.FC<Props> = ({ callStack }) => {
   const stackFrames = callStack || [];
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-lg p-4 flex flex-col h-full">
+    <div className="box-border h-full w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 flex flex-col">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
         Call Stack
         <span className="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-full">
@@ -40,7 +40,7 @@ export const TraceCallStackPanel: React.FC<Props> = ({ callStack }) => {
                   }`}
                 >
                   <div className="text-xs opacity-50 w-4 text-right">{index}</div>
-                  <div className="truncate flex-1">{frame}</div>
+                  <div className="break-all min-w-0 flex-1 text-xs">{frame}</div>
                   {isTop && (
                     <span className="text-[10px] bg-indigo-500/30 text-indigo-300 px-1.5 py-0.5 rounded">
                       TOP
