@@ -90,6 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // User Settings
     Route::get('/user/settings', [\App\Http\Controllers\Api\UserSettingsController::class, 'show']);
     Route::patch('/user/settings', [\App\Http\Controllers\Api\UserSettingsController::class, 'update']);
+
+    // Language Capabilities
+    Route::get('/languages/capabilities', [\App\Http\Controllers\Api\LanguageCapabilityController::class, 'index']);
 });
 
 /*

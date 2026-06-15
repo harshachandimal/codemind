@@ -50,6 +50,12 @@ const DashboardPage = () => {
         <div className="flex items-center gap-4">
           <span className="text-xs text-white/40">{user?.email}</span>
           <button
+            onClick={() => navigate('/languages')}
+            className="text-sm font-medium text-white/60 hover:text-white px-2 py-2 rounded-lg transition-all duration-200"
+          >
+            Language Support
+          </button>
+          <button
             onClick={() => navigate('/settings')}
             className="text-sm font-medium text-white/60 hover:text-white px-2 py-2 rounded-lg transition-all duration-200"
           >

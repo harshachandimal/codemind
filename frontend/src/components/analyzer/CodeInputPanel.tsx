@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Panel from '../common/Panel';
+import { useLanguageCapabilities } from '../../hooks/useLanguageCapabilities';
 
 type Props = {
   title: string;
@@ -23,6 +24,9 @@ const CodeInputPanel: React.FC<Props> = ({
   onTitleChange, onSourceCodeChange, onEntryFunctionChange, onInputJsonChange, onSubmit,
   editorFontSize = 14, language = 'javascript', onLanguageChange
 }) => {
+  const { capabilities } = useLanguageCapabilities();
+  const selectedCap = useMemo(() => capabilities.find(c => c.language === language), [capabilities, language]);
+
   return (
     <Panel className="p-6 flex flex-col h-full gap-4">
       <div className="flex flex-col gap-1">
@@ -39,15 +43,24 @@ const CodeInputPanel: React.FC<Props> = ({
       <div className="flex flex-col gap-1 flex-1">
         <div className="flex items-center justify-between">
           <label className="text-xs font-semibold text-white/50 uppercase tracking-widest">Source Code</label>
-          <select 
-            value={language}
-            onChange={e => onLanguageChange?.(e.target.value)}
-            className="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-xs text-indigo-400 font-medium focus:outline-none focus:border-indigo-500 transition-colors"
-          >
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-          </select>
+          <div className="flex items-center gap-3">
+            {selectedCap && (
+              <span className={`text-[10px] ${selectedCap.runtimeTraceEnabled ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
+                {selectedCap.runtimeTraceEnabled
+                  ? 'Runtime trace is enabled for this language.'
+                  : 'Runtime trace is currently disabled for this language. Static analysis still works.'}
+              </span>
+            )}
+            <select 
+              value={language}
+              onChange={e => onLanguageChange?.(e.target.value)}
+              className="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-xs text-indigo-400 font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+            </select>
+          </div>
         </div>
         <textarea
           value={sourceCode}
