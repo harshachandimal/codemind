@@ -7,7 +7,7 @@ import AnalysisStaticNote from './AnalysisStaticNote';
 import ComplexityLensPanel from '../visualizer/ComplexityLensPanel';
 import RecursionStackPreview from '../visualizer/RecursionStackPreview';
 import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
-import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
+import { RuntimeTracePlayer } from '../trace-player/RuntimeTracePlayer';
 import RecursionTreePanel from '../trace/RecursionTreePanel';
 import RecursionUnwindPanel from '../trace/RecursionUnwindPanel';
 import AnalysisExportButtons from './AnalysisExportButtons';
@@ -94,8 +94,7 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false, sett
               {/* Recursion Unwinding (renders only if recursive trace exists) */}
               <RecursionUnwindPanel analysis={analysis} />
 
-              {/* Step-by-step execution timeline */}
-              <RuntimeTraceTimeline analysis={analysis} />
+              <RuntimeTracePlayer rawSteps={analysis.trace_steps} language={analysis.language} />
             </>
           )}
         </>

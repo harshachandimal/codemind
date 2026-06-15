@@ -5,7 +5,7 @@ import ComplexityMetric from '../analyzer/ComplexityMetric';
 import PatternBadgeList from '../analyzer/PatternBadgeList';
 import DeleteAnalysisButton from './DeleteAnalysisButton';
 import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
-import RuntimeTraceTimeline from '../trace/RuntimeTraceTimeline';
+import { RuntimeTracePlayer } from '../trace-player/RuntimeTracePlayer';
 import AnalysisExportButtons from '../analyzer/AnalysisExportButtons';
 import AnalysisShareButton from '../analyzer/AnalysisShareButton';
 
@@ -59,7 +59,7 @@ const SelectedAnalysisPanel: React.FC<Props> = ({ analysis, deleting, onDelete }
 
       <RuntimeTraceSummaryPanel analysis={analysis} />
 
-      <RuntimeTraceTimeline analysis={analysis} />
+      <RuntimeTracePlayer rawSteps={analysis.trace_steps} language={analysis.language} />
 
       <div>
         <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-2">Source Code Snippet</h3>
