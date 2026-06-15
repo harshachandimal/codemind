@@ -408,10 +408,10 @@ class AnalysisApiTest extends TestCase
         });
     }
 
-    public function test_java_analysis_never_calls_tracer()
+    public function test_java_analysis_skips_tracer_when_java_flag_disabled()
     {
         config(['tracer.enabled' => true]);
-        config(['tracer.python_enabled' => true]);
+        config(['tracer.java_enabled' => false]);
         
         $user = User::factory()->create();
         Sanctum::actingAs($user);
@@ -419,16 +419,137 @@ class AnalysisApiTest extends TestCase
         $payload = [
             'title'       => 'Java script',
             'language'    => 'java',
-            'source_code' => 'class Main {}',
+            'source_code' => 'public class Main { public static int add(int a, int b) { return a + b; } }',
+            'entryFunction' => 'add',
+            'input' => [2, 3]
         ];
 
         $response = $this->postJson('/api/analyses', $payload);
 
         $response->assertStatus(201)
-            ->assertJsonPath('data.analysis.trace_mode', 'unsupported_language')
-            ->assertJsonPath('data.analysis.trace_error.code', 'JAVA_RUNTIME_TRACE_UNSUPPORTED')
+            ->assertJsonPath('data.analysis.trace_mode', 'planned')
+            ->assertJsonPath('data.analysis.trace_error.code', 'JAVA_RUNTIME_TRACE_DISABLED')
             ->assertJsonPath('data.analysis.trace_steps', []);
             
         \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+
+    public function test_java_analysis_calls_tracer_when_java_flag_enabled()
+    {
+        config(['tracer.enabled' => true]);
+        config(['tracer.java_enabled' => true]);
+        config(['tracer.service_url' => 'http://tracer.test']);
+        
+        \Illuminate\Support\Facades\Http::fake([
+            'http://tracer.test/trace' => \Illuminate\Support\Facades\Http::response([
+                "success" => true,
+                "executionEnabled" => true,
+                "mode" => "executed",
+                "message" => "Trace executed successfully.",
+                "trace" => [
+                    "steps" => [
+                        [
+                            "step" => 1,
+                            "line" => null,
+                            "type" => "function_call",
+                            "description" => "Called add",
+                            "variables" => [],
+                            "callStack" => ["add"]
+                        ]
+                    ],
+                    "summary" => [
+                        "totalSteps" => 1,
+                        "terminatedReason" => "completed"
+                    ]
+                ],
+                "result" => [
+                    "returnedValue" => 5
+                ],
+                "plan" => null,
+                "error" => null,
+                "metadata" => [
+                    "language" => "java",
+                    "entryFunction" => "add",
+                    "analyzedAt" => "2026-06-11T00:00:00.000Z"
+                ]
+            ], 200)
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Add function',
+            'language'    => 'java',
+            'source_code' => 'public class Main { public static int add(int a, int b) { return a + b; } }',
+            'entryFunction' => 'add',
+            'input' => [2, 3]
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'executed')
+            ->assertJsonPath('data.analysis.trace_result.returnedValue', 5);
+
+        \Illuminate\Support\Facades\Http::assertSent(function ($request) {
+            return $request->url() == 'http://tracer.test/trace' &&
+                   $request['language'] == 'java';
+        });
+    }
+
+    public function test_java_analysis_handles_tracer_error_safely()
+    {
+        config(['tracer.enabled' => true]);
+        config(['tracer.java_enabled' => true]);
+        config(['tracer.service_url' => 'http://tracer.test']);
+        
+        \Illuminate\Support\Facades\Http::fake([
+            'http://tracer.test/trace' => \Illuminate\Support\Facades\Http::response([
+                "success" => false,
+                "executionEnabled" => true,
+                "mode" => "error",
+                "message" => "Trace interpreter error: Unsupported syntax",
+                "trace" => [
+                    "steps" => [],
+                    "summary" => [
+                        "totalSteps" => 0,
+                        "terminatedReason" => "error"
+                    ]
+                ],
+                "result" => null,
+                "plan" => null,
+                "error" => [
+                    "code" => "JAVA_UNSUPPORTED_SYNTAX",
+                    "message" => "Trace interpreter error: Unsupported syntax"
+                ],
+                "metadata" => [
+                    "language" => "java",
+                    "entryFunction" => "add",
+                    "analyzedAt" => "2026-06-11T00:00:00.000Z"
+                ]
+            ], 200) // The tracer returns 200 OK even for logical errors
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $payload = [
+            'title'       => 'Add function',
+            'language'    => 'java',
+            'source_code' => 'import java.util.*; public class Main { public static int add(int a, int b) { return a + b; } }',
+            'entryFunction' => 'add',
+            'input' => [2, 3]
+        ];
+
+        $response = $this->postJson('/api/analyses', $payload);
+
+        // Analysis succeeds despite tracer returning a logical error
+        $response->assertStatus(201)
+            ->assertJsonPath('data.analysis.trace_mode', 'error')
+            ->assertJsonPath('data.analysis.trace_error.code', 'JAVA_UNSUPPORTED_SYNTAX');
+            
+        // Assert no raw exceptions in the response message
+        $this->assertStringNotContainsString('import java.util.*', $response->json('message'));
     }
 }

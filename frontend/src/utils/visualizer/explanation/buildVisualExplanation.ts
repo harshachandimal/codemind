@@ -1,12 +1,9 @@
-import type { Analysis } from '../../types/analysis';
-import type {
-  VisualExplanationModel,
-  ComplexityVisualItem,
-} from '../../types/visualizer';
-import { getComplexityTone, describeComplexity } from './complexityVisuals';
-import { buildPatternVisuals } from './patternVisuals';
-import { buildRecursionFrames } from './recursionVisuals';
-import { buildLoopSteps } from './loopVisuals';
+import type { Analysis } from '../../../types/analysis';
+import type { VisualExplanationModel, ComplexityVisualItem } from '../../../types/visualizer';
+import { getComplexityTone, describeComplexity } from '../visuals/complexityVisuals';
+import { buildPatternVisuals } from '../visuals/patternVisuals';
+import { buildRecursionFrames } from '../visuals/recursionVisuals';
+import { buildLoopSteps } from '../visuals/loopVisuals';
 
 /**
  * Converts a backend Analysis object into a VisualExplanationModel.

@@ -1,4 +1,4 @@
-import type { LoopPreviewStep } from '../../types/visualizer';
+import type { LoopPreviewStep } from '../../../types/visualizer';
 
 /**
  * Returns conceptual loop explanation steps based on the detected loop pattern.

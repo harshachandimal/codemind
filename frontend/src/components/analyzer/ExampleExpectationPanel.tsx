@@ -1,7 +1,7 @@
 import React from 'react';
 import type { TraceExample } from '../../constants/traceExamples';
 import type { Analysis } from '../../types/analysis';
-import { formatTraceValue } from '../../utils/formatTraceValue';
+import { formatTraceValue } from '../../utils/visualizer/formatters/formatTraceValue';
 
 type ExampleExpectationPanelProps = {
   example: TraceExample | null;

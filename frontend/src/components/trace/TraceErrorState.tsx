@@ -1,6 +1,6 @@
 import React from 'react';
 import type { TraceError } from '../../types/analysis';
-import { getTraceErrorPresentation } from '../../utils/traceErrorMessages';
+import { getTraceErrorPresentation } from '../../utils/visualizer/explanation/traceErrorMessages';
 
 type Props = {
   error: TraceError | null | undefined;

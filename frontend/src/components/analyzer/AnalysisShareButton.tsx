@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import type { Analysis, AnalysisShareData } from '../../types/analysis';
 import { createAnalysisShare, revokeAnalysisShare } from '../../services/analysisService';
-import { copyToClipboard } from '../../utils/copyToClipboard';
+import { copyToClipboard } from '../../utils/visualizer/export/copyToClipboard';
 import AnalysisShareModal from './AnalysisShareModal';
 
 type Props = {

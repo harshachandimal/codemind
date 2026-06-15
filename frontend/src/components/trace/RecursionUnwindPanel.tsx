@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Analysis } from '../../types/analysis';
-import { buildRecursionUnwindSteps } from '../../utils/recursionTrace';
+import { buildRecursionUnwindSteps } from '../../utils/visualizer/trace/recursionTrace';
 import Panel from '../common/Panel';
 
 type RecursionUnwindPanelProps = {

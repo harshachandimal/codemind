@@ -1,4 +1,5 @@
-import { Analysis } from '../types/analysis';
+import { Analysis } from '../../../types/analysis';
+
 
 export function hasExecutedTrace(analysis: Analysis): boolean {
   return analysis.trace_mode === 'executed'

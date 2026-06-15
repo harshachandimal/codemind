@@ -1,4 +1,4 @@
-import type { TraceStep } from '../types/analysis';
+import type { TraceStep } from '../../../types/analysis';
 
 export type RecursionTreeNode = {
   id: string;

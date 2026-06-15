@@ -15,7 +15,7 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import { SERVER_CONFIG } from './config/serverConfig.js';
-import { isTracerExecutionEnabled, isPythonTracerEnabled } from './config/runtimeFlags.js';
+import { isTracerExecutionEnabled, isPythonTracerEnabled, isJavaTracerEnabled } from './config/runtimeFlags.js';
 import traceRoutes from './routes/traceRoutes.js';
 
 const app = express();
@@ -50,6 +50,7 @@ app.get('/health', (_req: Request, res: Response): void => {
     status: 'ready',
     executionEnabled: isTracerExecutionEnabled(),
     pythonRuntimeEnabled: isPythonTracerEnabled(),
+    javaRuntimeEnabled: isJavaTracerEnabled(),
   });
 });
 

@@ -71,7 +71,7 @@ export type TraceResult = {
  */
 export type TraceRequest = {
   /** Target language. */
-  language: 'javascript' | 'python';
+  language: 'javascript' | 'python' | 'java';
   /** Raw source code string to be traced (not executed yet). */
   sourceCode: string;
   /** Optional name of the entry function to call. */

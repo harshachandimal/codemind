@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import type { TraceExample } from '../../constants/traceExamples';
-import { formatTraceValue } from '../../utils/formatTraceValue';
+import { formatTraceValue } from '../../utils/visualizer/formatters/formatTraceValue';
 
 type TraceExamplePreviewModalProps = {
   example: TraceExample | null;

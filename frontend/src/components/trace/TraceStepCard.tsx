@@ -1,8 +1,8 @@
 import React from 'react';
 import type { TraceStep } from '../../types/analysis';
-import { getTraceStepLabel, getTraceStepTone, type StepTone } from '../../utils/traceStepLabels';
+import { getTraceStepLabel, getTraceStepTone, type StepTone } from '../../utils/visualizer/trace/traceStepLabels';
 import VariableSnapshotInspector from './VariableSnapshotInspector';
-import { formatCallStack } from '../../utils/formatCallStack';
+import { formatCallStack } from '../../utils/visualizer/formatters/formatCallStack';
 
 type Props = {
   step: TraceStep;

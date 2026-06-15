@@ -5,3 +5,7 @@ export function isTracerExecutionEnabled(): boolean {
 export function isPythonTracerEnabled(): boolean {
   return process.env['PYTHON_TRACER_ENABLED'] === 'true';
 }
+
+export function isJavaTracerEnabled(): boolean {
+  return process.env['JAVA_TRACER_ENABLED'] === 'true';
+}

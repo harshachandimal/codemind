@@ -28,8 +28,8 @@ describe('TraceService', () => {
 
   it('invalid_language_returns_error_contract', () => {
     const invalidRequest = {
-      language: 'java',
-      sourceCode: 'System.out.println("hi");',
+      language: 'ruby',
+      sourceCode: 'puts "hi"',
     };
 
     const result = service.trace(invalidRequest);
@@ -210,5 +210,171 @@ describe('TraceService', () => {
     expect(result.success).toBe(false);
     expect(result.mode).toBe('error');
     expect(result.error?.message).toContain('Maximum Python call depth exceeded');
+  });
+
+  const originalJavaFlag = process.env.JAVA_TRACER_ENABLED;
+
+  afterEach(() => {
+    if (originalJavaFlag !== undefined) {
+      process.env.JAVA_TRACER_ENABLED = originalJavaFlag;
+    } else {
+      delete process.env.JAVA_TRACER_ENABLED;
+    }
+  });
+
+  it('java_trace_returns_planned_when_global_execution_disabled', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'false';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int add(int a, int b) { int result = a + b; return result; } }',
+      entryFunction: 'add',
+      input: [2, 3]
+    };
+    const result = service.trace(request);
+    
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('planned');
+    expect(result.executionEnabled).toBe(false);
+    expect(result.trace.steps).toEqual([]);
+    expect(JSON.stringify(result)).not.toContain('public static int add');
+  });
+
+  it('java_trace_returns_planned_when_java_flag_disabled', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'false';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int add(int a, int b) { int result = a + b; return result; } }',
+      entryFunction: 'add',
+      input: [2, 3]
+    };
+    const result = service.trace(request);
+    
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('planned');
+    expect(result.message).toContain('Java runtime tracing is not enabled yet');
+  });
+
+  it('java_trace_executes_when_both_flags_enabled', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int add(int a, int b) { int result = a + b; return result; } }',
+      entryFunction: 'add',
+      input: [2, 3]
+    };
+    const result = service.trace(request);
+    
+    expect(result.success).toBe(true);
+    expect(result.mode).toBe('executed');
+    expect(result.executionEnabled).toBe(true);
+    expect(result.result?.returnedValue).toBe(5);
+    expect(result.trace.steps.map(s => s.type)).toContain('function_call');
+    expect(result.trace.steps.map(s => s.type)).toContain('variable_declaration');
+    expect(result.trace.steps.map(s => s.type)).toContain('return');
+  });
+
+  it('java_trace_factorial_executes_when_enabled', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int factorial(int n) { if (n <= 1) { return 1; } return n * factorial(n - 1); } }',
+      entryFunction: 'factorial',
+      input: [4]
+    };
+    const result = service.trace(request);
+    
+    expect(result.result?.returnedValue).toBe(24);
+    expect(result.trace.steps.length).toBeGreaterThan(5);
+  });
+
+  it('java_trace_sum_array_executes_when_enabled', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int sumArray(int[] arr) { int total = 0; for (int i = 0; i < arr.length; i++) { total += arr[i]; } return total; } }',
+      entryFunction: 'sumArray',
+      input: [[1, 2, 3, 4]]
+    };
+    const result = service.trace(request);
+    
+    expect(result.result?.returnedValue).toBe(10);
+    expect(result.trace.steps.map(s => s.type)).toContain('loop_iteration');
+  });
+
+  it('java_trace_nested_loop_executes_when_enabled', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int countPairs(int n) { int count = 0; for (int i = 0; i < n; i++) { for (int j = 0; j < n; j++) { count++; } } return count; } }',
+      entryFunction: 'countPairs',
+      input: [3]
+    };
+    const result = service.trace(request);
+    
+    expect(result.result?.returnedValue).toBe(9);
+    expect(result.trace.steps.map(s => s.type)).toContain('loop_iteration');
+  });
+
+  it('java_trace_rejects_unsupported_import_safely', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'import java.util.*;\npublic class Main { public static int bad() { return 1; } }',
+      entryFunction: 'bad',
+      input: []
+    };
+    const result = service.trace(request);
+    
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('error');
+    expect(JSON.stringify(result)).not.toContain('import java.util');
+    expect(JSON.stringify(result)).not.toContain('stack');
+  });
+
+  it('java_trace_rejects_system_out_safely', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int bad() { System.out.println("unsafe"); return 1; } }',
+      entryFunction: 'bad',
+      input: []
+    };
+    const result = service.trace(request);
+    
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('error');
+  });
+
+  it('java_trace_enforces_max_call_depth', () => {
+    process.env.TRACER_EXECUTION_ENABLED = 'true';
+    process.env.JAVA_TRACER_ENABLED = 'true';
+    
+    const request = {
+      language: 'java',
+      sourceCode: 'public class Main { public static int forever(int n) { return forever(n + 1); } }',
+      entryFunction: 'forever',
+      input: [0]
+    };
+    const result = service.trace(request);
+    
+    expect(result.success).toBe(false);
+    expect(result.mode).toBe('error');
+    expect(result.error?.message).toContain('JAVA_MAX_CALL_DEPTH_EXCEEDED');
   });
 });

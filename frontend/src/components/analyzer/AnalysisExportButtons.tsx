@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Analysis, AnalysisExportFormat, AnalysisExportData } from '../../types/analysis';
 import { exportAnalysis } from '../../services/analysisService';
-import { downloadTextFile } from '../../utils/downloadTextFile';
+import { downloadTextFile } from '../../utils/visualizer/export/downloadTextFile';
 import AnalysisExportPreviewModal from './AnalysisExportPreviewModal';
 
 type Props = {

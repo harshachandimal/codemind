@@ -6,7 +6,7 @@ export function createPlannedTraceResponse(params: {
   message: string;
   plan: TracePlan | null;
   entryFunction: string | null;
-  language?: 'javascript' | 'python';
+  language?: 'javascript' | 'python' | 'java';
 }): TraceApiResponse {
   return {
     success: false,
@@ -36,7 +36,7 @@ export function createExecutedTraceResponse(params: {
   interpreterResult: any; // Using any or specific type if needed, but wait it was InterpreterResult
   plan: TracePlan | null;
   entryFunction: string | null;
-  language?: 'javascript' | 'python';
+  language?: 'javascript' | 'python' | 'java';
 }): TraceApiResponse {
   // Gracefully construct the summary even if the interpreterResult doesn't fully conform yet,
   // though the interpreter returns steps and finalState.
@@ -71,7 +71,7 @@ export function createErrorTraceResponse(params: {
   executionEnabled: boolean;
   plan?: TracePlan | null;
   entryFunction: string | null;
-  language?: 'javascript' | 'python';
+  language?: 'javascript' | 'python' | 'java';
 }): TraceApiResponse {
   return {
     success: false,

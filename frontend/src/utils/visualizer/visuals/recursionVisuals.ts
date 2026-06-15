@@ -1,4 +1,4 @@
-import type { RecursionStackFrame } from '../../types/visualizer';
+import type { RecursionStackFrame } from '../../../types/visualizer';
 
 /**
  * Returns a static conceptual recursion stack preview when recursion is detected.

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Analysis, TraceMode } from '../../types/analysis';
 import Panel from '../common/Panel';
-import { formatTraceValue } from '../../utils/formatTraceValue';
+import { formatTraceValue } from '../../utils/visualizer/formatters/formatTraceValue';
 import TraceErrorState from './TraceErrorState';
 
 type Props = { analysis: Analysis };
@@ -98,13 +98,21 @@ const RuntimeTraceSummaryPanel: React.FC<Props> = ({ analysis }) => {
       {trace_mode === 'planned' && (
         <>
           {trace_error?.code === 'PYTHON_RUNTIME_TRACE_DISABLED' ? (
-            <p className="text-xs text-indigo-300/80">
+            <span className="text-[11px] font-medium opacity-90">
               Python runtime tracing is currently disabled. Static complexity analysis is available.
-            </p>
+            </span>
+          ) : trace_error?.code === 'JAVA_RUNTIME_TRACE_DISABLED' ? (
+            <span className="text-[11px] font-medium opacity-90">
+              Java runtime tracing is currently disabled. Static complexity analysis is available.
+            </span>
           ) : trace_error?.message?.includes('Python runtime tracing is not enabled yet') ? (
-            <p className="text-xs text-indigo-300/80">
+            <span className="text-[11px] font-medium opacity-90">
               Python runtime tracing is not enabled yet. Static complexity analysis is available.
-            </p>
+            </span>
+          ) : trace_error?.message?.includes('Java runtime tracing is not enabled yet') ? (
+            <span className="text-[11px] font-medium opacity-90">
+              Java runtime tracing is not enabled yet. Static complexity analysis is available.
+            </span>
           ) : (
             <p className="text-xs text-indigo-300/80">
               Runtime execution was not enabled, but CodeMind generated a trace plan.
@@ -146,6 +154,8 @@ const RuntimeTraceSummaryPanel: React.FC<Props> = ({ analysis }) => {
               ? 'Java runtime tracing is not available yet. Static complexity analysis is available.'
               : trace_error?.message?.includes('Python runtime tracing is currently disabled')
               ? 'Python runtime tracing is currently disabled. Static complexity analysis is available.'
+              : trace_error?.message?.includes('Java runtime tracing is currently disabled')
+              ? 'Java runtime tracing is currently disabled. Static complexity analysis is available.'
               : 'Runtime tracing is currently available for JavaScript only. Static complexity analysis is available for this language.'}
           </p>
         </div>

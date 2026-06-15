@@ -1,6 +1,6 @@
 import React from 'react';
 import { TraceExample } from '../../constants/traceExamples';
-import { formatTraceValue } from '../../utils/formatTraceValue';
+import { formatTraceValue } from '../../utils/visualizer/formatters/formatTraceValue';
 
 type Props = {
   example: TraceExample;

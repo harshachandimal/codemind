@@ -1,6 +1,6 @@
-export { buildVisualExplanation } from './buildVisualExplanation';
-export { getComplexityTone, describeComplexity } from './complexityVisuals';
-export { buildPatternVisuals } from './patternVisuals';
-export { buildRecursionFrames } from './recursionVisuals';
-export { buildLoopSteps } from './loopVisuals';
-export { toTitleCaseFromSnakeCase } from './textFormatters';
+export { buildVisualExplanation } from './explanation/buildVisualExplanation';
+export { getComplexityTone, describeComplexity } from './visuals/complexityVisuals';
+export { buildPatternVisuals } from './visuals/patternVisuals';
+export { buildRecursionFrames } from './visuals/recursionVisuals';
+export { buildLoopSteps } from './visuals/loopVisuals';
+export { toTitleCaseFromSnakeCase } from './formatters/textFormatters';

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Analysis } from '../../types/analysis';
-import { buildRecursionTreeFromSteps } from '../../utils/recursionTrace';
+import { buildRecursionTreeFromSteps } from '../../utils/visualizer/trace/recursionTrace';
 import Panel from '../common/Panel';
 
 type RecursionTreePanelProps = {

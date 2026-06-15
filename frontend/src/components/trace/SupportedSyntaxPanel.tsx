@@ -18,7 +18,7 @@ const SupportedSyntaxPanel: React.FC<SupportedSyntaxPanelProps> = ({ compact }) 
         <h3 className="text-sm font-semibold text-white/80">Language Support & Syntax</h3>
         <p className="text-xs text-white/40 leading-relaxed">
           Static complexity analysis is supported for JavaScript, Python, and Java. 
-          Runtime trace step-by-step execution is fully supported for JavaScript and experimentally supported for Python. 
+          Runtime trace step-by-step execution is fully supported for JavaScript, and experimentally supported for Python and Java. 
           While loops are supported with a safe iteration limit to prevent infinite tracing. 
           Recursive tracing is protected by a maximum call-depth limit.
         </p>
@@ -61,15 +61,17 @@ const SupportedSyntaxPanel: React.FC<SupportedSyntaxPanelProps> = ({ compact }) 
         </div>
 
         {/* Java Section */}
-        <div className="flex flex-col gap-2">
-          <h4 className="text-[10px] font-semibold tracking-widest uppercase text-indigo-400/80 mb-1">
+        <div className="bg-white/5 p-4 rounded border border-white/10 shadow-sm">
+          <h4 className="text-[13px] font-semibold text-white/90 mb-2 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
             Java
           </h4>
-          <ul className="flex flex-col gap-1.5 text-[11px] text-white/60">
-            <li><span className="text-indigo-400">✓</span> Static analysis: supported</li>
-            <li><span className="text-white/30">−</span> Runtime trace: coming later</li>
-            <li><span className="text-indigo-400">✓</span> for/while loops, nested loops, recursion detection supported</li>
-          </ul>
+          <p className="text-[12px] text-white/70 mb-3 leading-relaxed">
+            Java runtime tracing is experimental and relies on a custom safe TypeScript interpreter. No JVM execution occurs. Supported syntax includes static methods, basic types, conditionals, loops, arrays, and recursion.
+          </p>
+          <div className="text-[11px] text-white/50 italic bg-black/20 p-2 rounded">
+            Java examples are available for: basic math, if-else, for loops, array sums, and recursion.
+          </div>
         </div>
       </div>
 

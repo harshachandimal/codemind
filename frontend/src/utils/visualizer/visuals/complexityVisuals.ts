@@ -1,4 +1,4 @@
-import type { VisualizerTone } from '../../types/visualizer';
+import type { VisualizerTone } from '../../../types/visualizer';
 
 /**
  * Maps a Big-O complexity string to a VisualizerTone.

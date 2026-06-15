@@ -30,9 +30,10 @@ import { validateTraceRequest } from '../validators/traceRequestValidator.js';
 import { runJavaScriptPreflight } from '../security/javascriptPreflight.js';
 import { parseJavaScriptToSummary } from '../parsers/javascriptAstParser.js';
 import { generateTracePlan } from '../planners/tracePlanGenerator.js';
-import { isTracerExecutionEnabled, isPythonTracerEnabled } from '../config/runtimeFlags.js';
+import { isTracerExecutionEnabled, isPythonTracerEnabled, isJavaTracerEnabled } from '../config/runtimeFlags.js';
 import { JavaScriptInterpreter } from '../interpreter/JavaScriptInterpreter.js';
 import { PythonInterpreter } from '../python/pythonInterpreter.js';
+import { JavaInterpreter } from '../java/javaInterpreter.js';
 import { TraceValidationError } from '../errors/TraceValidationError.js';
 import { TraceSafetyError } from '../errors/TraceSafetyError.js';
 import { TraceParseError } from '../errors/TraceParseError.js';
@@ -146,6 +147,66 @@ export class TraceService {
           executionEnabled,
           entryFunction,
           language: 'python',
+        });
+      }
+    }
+
+    // ── Step 2.5: Java branch ─────────────────────────────────────────────────
+    if (validatedRequest.language === 'java') {
+      if (!executionEnabled) {
+        return createPlannedTraceResponse({
+          message: 'Runtime execution is disabled.',
+          plan: null,
+          entryFunction,
+          language: 'java',
+        });
+      }
+      
+      const javaEnabled = isJavaTracerEnabled();
+      if (!javaEnabled) {
+        return createPlannedTraceResponse({
+          message: 'Java runtime tracing is not enabled yet.',
+          plan: null,
+          entryFunction,
+          language: 'java',
+        });
+      }
+
+      try {
+        const interpreter = new JavaInterpreter();
+        const result = interpreter.run({
+          sourceCode: validatedRequest.sourceCode,
+          entryFunction: validatedRequest.entryFunction || 'main',
+          input: validatedRequest.input || []
+        });
+
+        return createExecutedTraceResponse({
+          message: 'Execution completed successfully.',
+          interpreterResult: {
+            steps: result.steps,
+            finalState: { returnedValue: result.returnedValue },
+            terminatedReason: 'completed'
+          },
+          plan: null,
+          entryFunction,
+          language: 'java',
+        });
+      } catch (error: any) {
+        if (error instanceof TraceParseError || error.name === 'TraceParseError' || error instanceof TraceInterpreterError || error.name === 'TraceInterpreterError') {
+          return createErrorTraceResponse({
+            message: 'Trace interpreter error: ' + error.message,
+            errorCode: error.code || 'JAVA_TRACE_ERROR',
+            executionEnabled,
+            entryFunction,
+            language: 'java',
+          });
+        }
+        return createErrorTraceResponse({
+          message: 'An unexpected error occurred during Java interpretation.',
+          errorCode: 'UNKNOWN_TRACE_ERROR',
+          executionEnabled,
+          entryFunction,
+          language: 'java',
         });
       }
     }

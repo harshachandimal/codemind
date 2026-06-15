@@ -411,5 +411,92 @@ export const TRACE_EXAMPLES: TraceExample[] = [
       'Runtime tracing for Java is not available yet.'
     ],
   },
+  {
+    id: 'java-basic-add',
+    title: 'Java Basic Add',
+    description: 'A simple static method that adds two numbers.',
+    language: 'java',
+    category: 'basics',
+    sourceCode: `public class Main {
+    public static int add(int a, int b) {
+        int result = a + b;
+        return result;
+    }
+}`,
+    entryFunction: 'add',
+    input: [2, 3],
+  },
+  {
+    id: 'java-if-else',
+    title: 'Java If Else',
+    description: 'A basic if-else branching example.',
+    language: 'java',
+    category: 'basics',
+    sourceCode: `public class Main {
+    public static String sign(int n) {
+        if (n > 0) {
+            return "positive";
+        } else if (n < 0) {
+            return "negative";
+        } else {
+            return "zero";
+        }
+    }
+}`,
+    entryFunction: 'sign',
+    input: [5],
+  },
+  {
+    id: 'java-for-loop-sum',
+    title: 'Java For Loop Sum',
+    description: 'A classic for loop summing numbers.',
+    language: 'java',
+    category: 'loops',
+    sourceCode: `public class Main {
+    public static int sumRange(int n) {
+        int total = 0;
+        for (int i = 0; i < n; i++) {
+            total += i;
+        }
+        return total;
+    }
+}`,
+    entryFunction: 'sumRange',
+    input: [5],
+  },
+  {
+    id: 'java-array-sum',
+    title: 'Java Array Sum',
+    description: 'Iterating over an array using arr.length.',
+    language: 'java',
+    category: 'loops',
+    sourceCode: `public class Main {
+    public static int sumArray(int[] arr) {
+        int total = 0;
+        for (int i = 0; i < arr.length; i++) {
+            total += arr[i];
+        }
+        return total;
+    }
+}`,
+    entryFunction: 'sumArray',
+    input: [[1, 2, 3, 4]],
+  },
+  {
+    id: 'java-factorial-recursion',
+    title: 'Java Factorial Recursion',
+    description: 'A recursive factorial implementation.',
+    language: 'java',
+    category: 'recursion',
+    sourceCode: `public class Main {
+    public static int factorial(int n) {
+        if (n <= 1) {
+            return 1;
+        }
+        return n * factorial(n - 1);
+    }
+}`,
+    entryFunction: 'factorial',
+    input: [4],
+  }
 ];
-

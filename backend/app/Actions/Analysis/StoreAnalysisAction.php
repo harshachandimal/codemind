@@ -54,14 +54,14 @@ class StoreAnalysisAction
                 ];
                 $traceMetadata = null;
             } elseif ($lang === 'java') {
-                $traceMode = 'unsupported_language';
+                $traceMode = 'planned';
                 $traceSteps = [];
                 $traceSummary = null;
                 $traceResult = null;
                 $tracePlan = null;
                 $traceError = [
-                    'code' => 'JAVA_RUNTIME_TRACE_UNSUPPORTED',
-                    'message' => 'Java runtime tracing is not available yet. Static complexity analysis is available.'
+                    'code' => 'JAVA_RUNTIME_TRACE_DISABLED',
+                    'message' => 'Java runtime tracing is currently disabled. Static complexity analysis is available.'
                 ];
                 $traceMetadata = null;
             } else {
@@ -109,6 +109,7 @@ class StoreAnalysisAction
         return match (strtolower($language)) {
             'javascript' => true,
             'python' => (bool) config('tracer.python_enabled'),
+            'java' => (bool) config('tracer.java_enabled'),
             default => false,
         };
     }

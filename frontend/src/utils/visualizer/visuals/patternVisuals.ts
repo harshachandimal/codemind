@@ -1,5 +1,5 @@
-import type { PatternVisualItem, VisualizerTone } from '../../types/visualizer';
-import { toTitleCaseFromSnakeCase } from './textFormatters';
+import type { PatternVisualItem, VisualizerTone } from '../../../types/visualizer';
+import { toTitleCaseFromSnakeCase } from '../formatters/textFormatters';
 
 /** Lookup table for known pattern keys. */
 export const KNOWN_PATTERN_MAP: Record<

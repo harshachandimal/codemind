@@ -3,7 +3,7 @@ import type { Analysis } from '../../types/analysis';
 import TraceStepCard from './TraceStepCard';
 import TracePlaybackControls from './TracePlaybackControls';
 import Panel from '../common/Panel';
-import { getChangedVariableKeys } from '../../utils/traceVariableDiff';
+import { getChangedVariableKeys } from '../../utils/visualizer/trace/traceVariableDiff';
 import TraceErrorState from './TraceErrorState';
 
 type Props = { analysis: Analysis };
