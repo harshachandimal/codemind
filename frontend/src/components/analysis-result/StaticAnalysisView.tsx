@@ -1,10 +1,13 @@
 import React from 'react';
 import type { Analysis } from '../../types/analysis';
 import type { UserSettings } from '../../types/settings';
-import { buildVisualExplanation } from '../../utils/visualizer';
-import ComplexityLensPanel from '../visualizer/ComplexityLensPanel';
+import { buildPatternVisuals } from '../../utils/visualizer';
+import { buildRecursionFrames } from '../../utils/visualizer';
+import StaticAnalysisOverview from './static/StaticAnalysisOverview';
+import PatternInsightsPanel from './static/PatternInsightsPanel';
+import StaticExplanationPanel from './static/StaticExplanationPanel';
+import StaticDiagnosticsPanel from './static/StaticDiagnosticsPanel';
 import RecursionStackPreview from '../visualizer/RecursionStackPreview';
-import AnalysisStaticNote from '../analyzer/AnalysisStaticNote';
 
 type Props = {
   analysis: Analysis;
@@ -12,36 +15,44 @@ type Props = {
 };
 
 const StaticAnalysisView: React.FC<Props> = ({ analysis, settings }) => {
-  const visualModel = buildVisualExplanation(analysis);
+  const patterns       = buildPatternVisuals(analysis.detected_patterns);
+  const recursionFrames = buildRecursionFrames(analysis.detected_patterns);
+  const showVisuals    = settings?.show_visual_explanations !== false;
 
   return (
-    <div className="flex flex-col gap-5">
-      {settings?.show_visual_explanations !== false ? (
-        <>
-          <ComplexityLensPanel
-            complexityItems={visualModel.complexityItems}
-            patterns={visualModel.patterns}
-          />
-          {visualModel.recursionFrames.length > 0 && (
-            <RecursionStackPreview frames={visualModel.recursionFrames} />
-          )}
-        </>
-      ) : (
-        <div className="text-xs text-white/40 italic">Visual explanations are hidden in your settings.</div>
-      )}
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
 
-      {analysis.explanation && (
-        <div className="flex flex-col gap-2">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-white/30">
-            Explanation
-          </p>
-          <div className="text-sm text-white/60 leading-relaxed bg-white/[0.03] px-4 py-3 rounded-xl border border-white/[0.06]">
-            {analysis.explanation}
-          </div>
+      {/* A) Complexity Overview — two cards */}
+      <StaticAnalysisOverview analysis={analysis} />
+
+      {/*
+        B/C/D) Main content grid:
+        Desktop xl+: explanation takes the left column,
+                     patterns + diagnostics stack in the right sidebar.
+        Mobile:      everything stacks vertically.
+      */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+
+        {/* Left: Explanation */}
+        <StaticExplanationPanel explanation={analysis.explanation} />
+
+        {/* Right sidebar: Patterns + Diagnostics */}
+        <div className="flex flex-col gap-6">
+          <PatternInsightsPanel patterns={patterns} />
+          <StaticDiagnosticsPanel analysis={analysis} />
         </div>
+      </div>
+
+      {/* E) Optional static visuals — only when data exists and user hasn't hidden them */}
+      {showVisuals && recursionFrames.length > 0 && (
+        <RecursionStackPreview frames={recursionFrames} />
       )}
 
-      <AnalysisStaticNote />
+      {!showVisuals && (
+        <p className="text-xs text-white/30 italic">
+          Visual explanations are hidden in your settings.
+        </p>
+      )}
     </div>
   );
 };
