@@ -9,6 +9,7 @@ import HistoryPage from '../pages/HistoryPage';
 import SharedAnalysisPage from '../pages/SharedAnalysisPage';
 import SettingsPage from '../pages/SettingsPage';
 import { LanguageCapabilitiesPage } from '../pages/LanguageCapabilitiesPage';
+import RuntimeTraceFullPage from '../pages/RuntimeTraceFullPage';
 import ProtectedRoute from './ProtectedRoute';
 
 const AppRoutes = () => {
@@ -29,6 +30,7 @@ const AppRoutes = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/analyzer" element={<AnalyzerPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/history/:analysisId/runtime-trace" element={<RuntimeTraceFullPage />} />
           <Route path="/languages" element={<LanguageCapabilitiesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>

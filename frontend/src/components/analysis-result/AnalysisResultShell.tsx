@@ -16,7 +16,11 @@ type Props = {
 
 type Tab = 'static' | 'runtime';
 
-const AnalysisResultShell: React.FC<Props> = ({ analysis, readOnly = false, settings }) => {
+const AnalysisResultShell: React.FC<Props> = ({ 
+  analysis, 
+  readOnly = false, 
+  settings
+}) => {
   const [activeTab, setActiveTab] = useState<Tab>('static');
 
   if (!analysis) return <AnalyzerEmptyState />;

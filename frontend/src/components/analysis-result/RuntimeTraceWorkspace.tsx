@@ -3,14 +3,22 @@ import type { Analysis } from '../../types/analysis';
 import { RuntimeTracePlayer } from '../trace-player/RuntimeTracePlayer';
 import { formatTraceValue } from '../../utils/formatTraceValue';
 import { TracePlayerStep } from '../../types/tracePlayer';
+import { RuntimeTraceRunForm } from '../trace-player/RuntimeTraceRunForm';
 
 type Props = {
   analysis: Analysis;
   onStepChange?: (step: TracePlayerStep | null) => void;
+  onRunTrace?: (entryFunction: string | null, input: unknown[]) => void;
+  isRunningTrace?: boolean;
 };
 
 
-export const RuntimeTraceWorkspace: React.FC<Props> = ({ analysis, onStepChange }) => {
+export const RuntimeTraceWorkspace: React.FC<Props> = ({ 
+  analysis, 
+  onStepChange, 
+  onRunTrace, 
+  isRunningTrace = false 
+}) => {
   const hasRuntimeError = !!analysis.trace_error;
   const isRuntimeAvailable = !['unsupported_language', 'unsupported', 'not_available'].includes(analysis.trace_mode as string);
   const steps = analysis.trace_steps || [];
@@ -69,11 +77,21 @@ export const RuntimeTraceWorkspace: React.FC<Props> = ({ analysis, onStepChange 
           />
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center p-12 bg-slate-900/30 rounded-xl border border-slate-800/60 text-center gap-3 h-full min-h-[300px]">
-          <p className="text-sm text-slate-500">
-            No trace steps were captured during execution.
-          </p>
-        </div>
+        onRunTrace ? (
+          <RuntimeTraceRunForm
+            language={analysis.language}
+            defaultEntryFunction={analysis.entry_function}
+            defaultInput={analysis.runtime_input}
+            isRunning={isRunningTrace}
+            onRun={onRunTrace}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center p-12 bg-slate-900/30 rounded-xl border border-slate-800/60 text-center gap-3 h-full min-h-[300px]">
+            <p className="text-sm text-slate-500">
+              No trace steps were captured during execution.
+            </p>
+          </div>
+        )
       )}
     </div>
   );

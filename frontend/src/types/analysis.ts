@@ -64,6 +64,8 @@ export type Analysis = {
   trace_plan: TracePlan | null;
   trace_error: TraceError | null;
   trace_metadata: TraceMetadata | null;
+  entry_function: string | null;
+  runtime_input: unknown[] | null;
   created_at: string;
   updated_at: string;
 };

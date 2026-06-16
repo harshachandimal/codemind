@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import PageShell from '../components/common/PageShell';
 import SectionHeader from '../components/common/SectionHeader';
 import HistoryList from '../components/history/HistoryList';
@@ -47,9 +48,22 @@ const HistoryPage: React.FC = () => {
     }
   };
 
+  const handleAnalysisUpdated = (updatedAnalysis: Analysis) => {
+    setAnalyses(analyses.map(a => a.id === updatedAnalysis.id ? updatedAnalysis : a));
+    if (selectedAnalysis?.id === updatedAnalysis.id) {
+      setSelectedAnalysis(updatedAnalysis);
+    }
+  };
+
   return (
     <PageShell>
-      <div className="w-full max-w-7xl mx-auto px-6 py-12">
+      <div className="w-full max-w-7xl mx-auto px-6 py-12 relative">
+        <Link
+          to="/dashboard"
+          className="absolute top-12 left-6 text-sm font-medium text-white/50 hover:text-white flex items-center gap-2 transition-colors hidden md:flex"
+        >
+          &larr; Back to Dashboard
+        </Link>
         <SectionHeader 
           title="Analysis History" 
           description="View and manage your previous code analysis reports." 
@@ -73,7 +87,8 @@ const HistoryPage: React.FC = () => {
                 <SelectedAnalysisPanel 
                   analysis={selectedAnalysis} 
                   deleting={deleting} 
-                  onDelete={handleDelete} 
+                  onDelete={handleDelete}
+                  onAnalysisUpdated={handleAnalysisUpdated}
                 />
               </div>
             </div>

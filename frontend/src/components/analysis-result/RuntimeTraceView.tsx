@@ -29,7 +29,10 @@ const RuntimeTraceView: React.FC<Props> = ({ analysis }) => {
         />
       </div>
       <div className="min-w-0 flex flex-col">
-        <RuntimeTraceWorkspace analysis={analysis} onStepChange={setCurrentStep} />
+        <RuntimeTraceWorkspace 
+          analysis={analysis} 
+          onStepChange={setCurrentStep}
+        />
       </div>
     </section>
   );

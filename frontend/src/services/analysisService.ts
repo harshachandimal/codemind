@@ -39,6 +39,17 @@ export async function deleteAnalysis(
   return response.data;
 }
 
+export async function runAnalysisRuntimeTrace(
+  id: number,
+  payload: { entryFunction?: string | null; input?: unknown[] }
+): Promise<ApiResponse<AnalysisResponseData>> {
+  const response = await apiClient.post<ApiResponse<AnalysisResponseData>>(
+    `/analyses/${id}/runtime-trace`,
+    payload
+  );
+  return response.data;
+}
+
 export async function exportAnalysis(
   analysisId: number | string,
   format: AnalysisExportFormat
