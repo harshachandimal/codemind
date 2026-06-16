@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PageShell from '../common/PageShell';
 import Panel from '../common/Panel';
 import Badge from '../common/Badge';
@@ -12,7 +13,13 @@ type AuthShellProps = {
 const AuthShell = ({ children, title, subtitle }: AuthShellProps) => {
   return (
     <PageShell>
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 w-full">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 w-full relative">
+        <Link
+          to="/"
+          className="absolute top-6 left-6 sm:top-12 sm:left-12 text-sm font-medium text-white/50 hover:text-white flex items-center gap-2 transition-colors"
+        >
+          &larr; Back to Home
+        </Link>
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-8">
