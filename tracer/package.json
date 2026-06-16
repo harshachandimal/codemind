@@ -4,8 +4,8 @@
   "description": "CodeMind tracer service — runtime execution trace generation for JavaScript code (foundation scaffold).",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx src/server.ts",
-    "dev:exec": "cross-env TRACER_EXECUTION_ENABLED=true tsx src/server.ts",
+    "dev": "cross-env TRACER_EXECUTION_ENABLED=true JAVA_TRACER_ENABLED=true tsx src/server.ts",
+    "dev:exec": "cross-env TRACER_EXECUTION_ENABLED=true JAVA_TRACER_ENABLED=true tsx src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",

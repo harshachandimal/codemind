@@ -2,6 +2,7 @@ import type { UpdateExpression, Identifier } from '@babel/types';
 import { TraceInterpreterError } from '../../errors/TraceInterpreterError.js';
 import type { InterpreterEnvironment } from '../InterpreterEnvironment.js';
 import { getNodeLine } from '../core/getNodeLine.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 
 export function executeUpdateExpression(
   node: UpdateExpression,
@@ -48,6 +49,8 @@ export function executeUpdateExpression(
 
   env.recorder.record({
     line: getNodeLine(node),
+    lineNumber: getLineNumber(node),
+    columnNumber: getColumnNumber(node),
     type: 'assignment',
     description: `Variable ${varName} was assigned value ${newValue}.`,
   });

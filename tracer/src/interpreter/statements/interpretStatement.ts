@@ -11,6 +11,7 @@ import { executeWhileStatement } from './executeWhileStatement.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { formatRuntimeValue } from '../utils/formatRuntimeValue.js';
 import { getNodeLine } from '../core/getNodeLine.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 
 export function interpretStatement(
   stmt: Statement,
@@ -25,6 +26,8 @@ export function interpretStatement(
     }
     env.recorder.record({
       line: getNodeLine(stmt),
+      lineNumber: getLineNumber(stmt),
+      columnNumber: getColumnNumber(stmt),
       type: 'return',
       description: `Return expression evaluated to ${formatRuntimeValue(retVal)}.`,
     });

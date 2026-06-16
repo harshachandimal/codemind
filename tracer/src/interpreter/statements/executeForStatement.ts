@@ -8,6 +8,7 @@ import { executeAssignmentExpression } from './executeAssignmentExpression.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { interpretBlock } from '../core/interpretBlock.js';
 import { getNodeLine } from '../core/getNodeLine.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 import { executeUpdateExpression } from './executeUpdateExpression.js';
 import { assertLoopDepthAvailable } from '../assertLoopDepth.js';
 
@@ -48,6 +49,8 @@ export function executeForStatement(
 
     env.recorder.record({
       line: getNodeLine(node),
+      lineNumber: getLineNumber(node),
+      columnNumber: getColumnNumber(node),
       type: 'loop_start',
       description: `For loop started at depth ${depth}.`,
     });
@@ -71,6 +74,8 @@ export function executeForStatement(
       iterationCount++;
       env.recorder.record({
         line: getNodeLine(node),
+        lineNumber: getLineNumber(node),
+        columnNumber: getColumnNumber(node),
         type: 'loop_iteration',
         description: `For loop iteration ${iterationCount} started at depth ${depth}.`,
       });
@@ -97,6 +102,8 @@ export function executeForStatement(
 
     env.recorder.record({
       line: getNodeLine(node),
+      lineNumber: getLineNumber(node),
+      columnNumber: getColumnNumber(node),
       type: 'loop_exit',
       description: `For loop exited after ${iterationCount} iteration(s) at depth ${depth}.`,
     });

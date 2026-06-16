@@ -6,6 +6,7 @@ import { TRACE_LIMITS } from '../../config/traceLimits.js';
 import { interpretBlock } from './interpretBlock.js';
 import { formatRuntimeValue } from '../utils/formatRuntimeValue.js';
 import { getNodeLine } from './getNodeLine.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 
 export function executeFunctionCall(
   targetFn: FunctionDeclaration,
@@ -45,6 +46,8 @@ export function executeFunctionCall(
 
   env.recorder.record({
     line: getNodeLine(targetFn),
+    lineNumber: getLineNumber(targetFn),
+    columnNumber: getColumnNumber(targetFn),
     type: 'function_call',
     description: `Function ${fnName} was called.`,
   });
@@ -65,6 +68,8 @@ export function executeFunctionCall(
 
     env.recorder.record({
       line: null,
+      lineNumber: getLineNumber(targetFn),
+      columnNumber: getColumnNumber(targetFn),
       type: 'return',
       description: `Function ${fnName} returned ${formatRuntimeValue(returnedValue as RuntimeValue)}.`,
     });

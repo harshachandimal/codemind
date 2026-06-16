@@ -1166,5 +1166,38 @@ function odd(n) {
     expect(types).toContain('array_read');
     expect(types).toContain('loop_iteration');
   });
-});
+  it('attaches_source_line_metadata_to_trace_steps', () => {
+    const result = interpreter.interpret({
+      language: 'javascript',
+      sourceCode: `function sum(arr) {
+  let total = 0;
+  for (let i = 0; i < arr.length; i++) {
+    total = total + arr[i];
+  }
+  return total;
+}`,
+      entryFunction: 'sum',
+      input: [[2, 4, 6]],
+    });
 
+    expect(result.success).toBe(true);
+
+    const fnCall = result.steps.find((s) => s.type === 'function_call');
+    expect(fnCall?.lineNumber).toBe(1);
+
+    const varDecl = result.steps.find((s) => s.type === 'variable_declaration' && s.description.includes('total'));
+    expect(varDecl?.lineNumber).toBe(2);
+
+    const loopStart = result.steps.find((s) => s.type === 'loop_start');
+    expect(loopStart?.lineNumber).toBe(3);
+
+    const assignment = result.steps.find((s) => s.type === 'assignment' && s.description.includes('total = total + arr[i]'));
+    // Depending on AST representation, it could be the statement or the expression. Usually lines match up.
+    // The test only requires the assignment step has lineNumber 4.
+    const assignStep = result.steps.find((s) => s.type === 'assignment' && s.lineNumber === 4);
+    expect(assignStep).toBeDefined();
+
+    const returnStep = result.steps.find((s) => s.type === 'return');
+    expect(returnStep?.lineNumber).toBe(6);
+  });
+});

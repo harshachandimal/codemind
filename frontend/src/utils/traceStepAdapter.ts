@@ -45,6 +45,13 @@ export function normalizeTraceSteps(rawSteps: unknown[]): TracePlayerStep[] {
         variableChanges = stepRecord.variableChanges.filter((v): v is string => typeof v === 'string');
       }
 
+      let columnNumber: number | null = null;
+      if (typeof stepRecord.columnNumber === 'number') {
+        columnNumber = stepRecord.columnNumber;
+      } else if (stepRecord.loc && typeof (stepRecord.loc as any).start?.column === 'number') {
+        columnNumber = (stepRecord.loc as any).start.column;
+      }
+
       return {
         id: `step-${index}-${Date.now()}`,
         index,
@@ -55,6 +62,7 @@ export function normalizeTraceSteps(rawSteps: unknown[]): TracePlayerStep[] {
         callStack,
         returnedValue,
         lineNumber,
+        columnNumber,
         operation,
         variableChanges,
         rawStep,

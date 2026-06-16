@@ -32,6 +32,8 @@ export class StepRecorder {
    */
   public record(params: {
     line: number | null;
+    lineNumber?: number | null;
+    columnNumber?: number | null;
     type: TraceStepType;
     description: string;
   }): TraceStep {
@@ -52,6 +54,8 @@ export class StepRecorder {
     const step: TraceStep = {
       step: this.state.stepCount,
       line: params.line,
+      lineNumber: params.lineNumber ?? params.line,
+      columnNumber: params.columnNumber,
       type: params.type,
       description: params.description,
       variables: snapshotVariables(currentVars),

@@ -5,6 +5,7 @@ import type { RuntimeValue } from '../../types/interpreter.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { formatRuntimeValue } from '../utils/formatRuntimeValue.js';
 import { getNodeLine } from '../core/getNodeLine.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 
 export function executeVariableDeclaration(
   node: VariableDeclaration,
@@ -40,6 +41,8 @@ export function executeVariableDeclaration(
 
     env.recorder.record({
       line: getNodeLine(decl),
+      lineNumber: getLineNumber(decl),
+      columnNumber: getColumnNumber(decl),
       type: 'variable_declaration',
       description: `Variable ${varName} was declared with value ${formatRuntimeValue(initialValue)}.`,
     });

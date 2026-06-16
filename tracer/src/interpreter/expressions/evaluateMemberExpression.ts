@@ -5,6 +5,7 @@ import type { RuntimeValue } from '../../types/interpreter.js';
 import { evaluateExpression } from './evaluateExpression.js';
 import { formatRuntimeValue } from '../utils/formatRuntimeValue.js';
 import { getNodeLine } from '../core/getNodeLine.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 
 /**
  * Evaluates a MemberExpression safely.
@@ -62,6 +63,8 @@ export function evaluateMemberExpression(
     const lengthValue = arr.length;
     env.recorder.record({
       line: getNodeLine(node),
+      lineNumber: getLineNumber(node),
+      columnNumber: getColumnNumber(node),
       type: 'array_read',
       description: `Read ${objectLabel}.length as ${lengthValue}.`,
     });
@@ -89,6 +92,8 @@ export function evaluateMemberExpression(
     const val = arr[indexValue] as RuntimeValue;
     env.recorder.record({
       line: getNodeLine(node),
+      lineNumber: getLineNumber(node),
+      columnNumber: getColumnNumber(node),
       type: 'array_read',
       description: `Read ${objectLabel}[${indexValue}] as ${formatRuntimeValue(val)}.`,
     });

@@ -3,6 +3,7 @@ import { TraceInterpreterError } from '../../errors/TraceInterpreterError.js';
 import type { InterpreterEnvironment } from '../InterpreterEnvironment.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { formatRuntimeValue } from '../utils/formatRuntimeValue.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 import { getNodeLine } from '../core/getNodeLine.js';
 
 export function executeAssignmentExpression(
@@ -31,6 +32,8 @@ export function executeAssignmentExpression(
 
   env.recorder.record({
     line: getNodeLine(node),
+    lineNumber: getLineNumber(node),
+    columnNumber: getColumnNumber(node),
     type: 'assignment',
     description: `Variable ${varName} was assigned value ${formatRuntimeValue(newValue)}.`,
   });

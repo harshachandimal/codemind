@@ -31,6 +31,10 @@ export type TraceStep = {
   step: number;
   /** Source line number this step corresponds to, or null if unavailable. */
   line: number | null;
+  /** 1-based source line number. */
+  lineNumber?: number | null;
+  /** 0-based source column number. */
+  columnNumber?: number | null;
   /** Category of event recorded at this step. */
   type: TraceStepType;
   /** Human-readable description of what occurred. */

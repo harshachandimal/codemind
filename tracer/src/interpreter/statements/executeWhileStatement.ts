@@ -4,6 +4,7 @@ import type { RuntimeValue } from '../../types/interpreter.js';
 import { TraceInterpreterError } from '../../errors/TraceInterpreterError.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { interpretBlock } from '../core/interpretBlock.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 import { getNodeLine } from '../core/getNodeLine.js';
 import { TRACE_LIMITS } from '../../config/traceLimits.js';
 import { assertLoopDepthAvailable } from '../assertLoopDepth.js';
@@ -31,7 +32,9 @@ export function executeWhileStatement(
     const depth = env.state.loopDepth;
 
     env.recorder.record({
-      line,
+      line: getNodeLine(stmt),
+      lineNumber: getLineNumber(stmt),
+      columnNumber: getColumnNumber(stmt),
       type: 'loop_start',
       description: `While loop started at depth ${depth}.`,
     });
@@ -60,7 +63,9 @@ export function executeWhileStatement(
       iterationCount++;
 
       env.recorder.record({
-        line,
+        line: getNodeLine(stmt),
+        lineNumber: getLineNumber(stmt),
+        columnNumber: getColumnNumber(stmt),
         type: 'loop_iteration',
         description: `While loop iteration ${iterationCount} started at depth ${depth}.`,
       });
@@ -73,7 +78,9 @@ export function executeWhileStatement(
     }
 
     env.recorder.record({
-      line,
+      line: getNodeLine(stmt),
+      lineNumber: getLineNumber(stmt),
+      columnNumber: getColumnNumber(stmt),
       type: 'loop_exit',
       description: `While loop exited after ${iterationCount} iteration(s) at depth ${depth}.`,
     });

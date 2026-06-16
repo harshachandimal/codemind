@@ -1,10 +1,11 @@
-﻿import type { IfStatement } from '@babel/types';
+import type { IfStatement } from '@babel/types';
 import { TraceInterpreterError } from '../../errors/TraceInterpreterError.js';
 import type { InterpreterEnvironment } from '../InterpreterEnvironment.js';
 import type { RuntimeValue } from '../../types/interpreter.js';
 import { evaluateExpression } from '../expressions/evaluateExpression.js';
 import { describeCondition } from '../utils/describeCondition.js';
 import { interpretBlock } from '../core/interpretBlock.js';
+import { getLineNumber, getColumnNumber } from '../../utils/sourceLocation.js';
 import { getNodeLine } from '../core/getNodeLine.js';
 
 export function executeIfStatement(
@@ -23,6 +24,8 @@ export function executeIfStatement(
 
   env.recorder.record({
     line: getNodeLine(node),
+    lineNumber: getLineNumber(node),
+    columnNumber: getColumnNumber(node),
     type: 'condition',
     description: `Condition ${describeCondition(node.test)} evaluated to ${testValue}.`,
   });
@@ -30,6 +33,8 @@ export function executeIfStatement(
   if (testValue) {
     env.recorder.record({
       line: getNodeLine(node.consequent),
+      lineNumber: getLineNumber(node.consequent),
+      columnNumber: getColumnNumber(node.consequent),
       type: 'branch',
       description: 'Entered if branch.',
     });
@@ -46,6 +51,8 @@ export function executeIfStatement(
     if (node.alternate.type === 'BlockStatement') {
       env.recorder.record({
         line: getNodeLine(node.alternate),
+        lineNumber: getLineNumber(node.alternate),
+        columnNumber: getColumnNumber(node.alternate),
         type: 'branch',
         description: 'Entered else branch.',
       });
@@ -53,6 +60,8 @@ export function executeIfStatement(
     } else if (node.alternate.type === 'IfStatement') {
       env.recorder.record({
         line: getNodeLine(node.alternate),
+        lineNumber: getLineNumber(node.alternate),
+        columnNumber: getColumnNumber(node.alternate),
         type: 'branch',
         description: 'Entered else-if branch.',
       });
@@ -66,6 +75,8 @@ export function executeIfStatement(
   } else {
     env.recorder.record({
       line: getNodeLine(node),
+      lineNumber: getLineNumber(node),
+      columnNumber: getColumnNumber(node),
       type: 'branch',
       description: 'Skipped if branch.',
     });

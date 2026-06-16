@@ -8,6 +8,7 @@ export type TracePlayerStep = {
   callStack?: string[];
   returnedValue?: unknown;
   lineNumber?: number | null;
+  columnNumber?: number | null;
   operation?: string | null;
   variableChanges?: string[];
   rawStep: unknown;
