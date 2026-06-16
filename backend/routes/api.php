@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Analysis\AnalysisRuntimeTraceController;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +84,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Share Routes
     Route::post('/analyses/{analysis}/share', [AnalysisShareController::class, 'store']);
     Route::delete('/analyses/{analysis}/share', [AnalysisShareController::class, 'destroy']);
+
+    // Runtime Trace (re-run trace for a saved analysis)
+    Route::post('/analyses/{analysis}/runtime-trace', [AnalysisRuntimeTraceController::class, 'store']);
 
     // Dashboard
     Route::get('/dashboard/analytics', [DashboardAnalyticsController::class, 'show']);

@@ -97,6 +97,8 @@ class StoreAnalysisAction
             'trace_plan'        => $tracePlan,
             'trace_error'       => $traceError,
             'trace_metadata'    => $traceMetadata,
+            'entry_function'    => $data['entryFunction'] ?? null,
+            'runtime_input'     => $data['input'] ?? null,
         ]);
     }
 

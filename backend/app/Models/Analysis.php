@@ -29,6 +29,8 @@ class Analysis extends Model
         'trace_plan',
         'trace_error',
         'trace_metadata',
+        'entry_function',
+        'runtime_input',
     ];
 
     protected function casts(): array
@@ -39,9 +41,10 @@ class Analysis extends Model
             'trace_steps' => 'array',
             'trace_summary' => 'array',
             'trace_result' => 'array',
-            'trace_plan' => 'array',
-            'trace_error' => 'array',
-            'trace_metadata' => 'array',
+            'trace_plan'           => 'array',
+            'trace_error'          => 'array',
+            'trace_metadata'       => 'array',
+            'runtime_input'        => 'array',
         ];
     }
 

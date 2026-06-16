@@ -33,6 +33,8 @@ class AnalysisResource extends JsonResource
             'trace_plan' => $this->trace_plan,
             'trace_error' => $this->trace_error,
             'trace_metadata' => $this->trace_metadata,
+            'entry_function' => $this->entry_function,
+            'runtime_input' => $this->runtime_input,
             'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toIso8601String() : null,
         ];
