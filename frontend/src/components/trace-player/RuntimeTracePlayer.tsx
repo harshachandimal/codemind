@@ -59,7 +59,7 @@ export const RuntimeTracePlayer: React.FC<Props> = ({ rawSteps, language, onStep
   }
 
   return (
-    <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-950/50">
+    <div className="w-full min-w-0 rounded-2xl border border-slate-700/60 bg-slate-950/50 overflow-x-hidden">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60">
         <h2 className="text-base font-bold text-slate-100">
@@ -93,7 +93,7 @@ export const RuntimeTracePlayer: React.FC<Props> = ({ rawSteps, language, onStep
         - 2xl (~1536px): 3 columns — Timeline | StepDetails | RuntimeState
         This prevents the 3-column grid from ever exceeding the available container width.
       */}
-      <div className="grid min-w-0 grid-cols-1 gap-3 p-3 xl:grid-cols-[200px_minmax(0,1fr)] 2xl:grid-cols-[200px_minmax(0,1fr)_minmax(0,0.85fr)]">
+      <div className="grid min-w-0 grid-cols-1 gap-3 p-3 items-start xl:grid-cols-[200px_minmax(0,1fr)] 2xl:grid-cols-[200px_minmax(0,1fr)_minmax(0,0.85fr)]">
 
         {/* Column 1: Timeline — fixed narrow width */}
         <div className="min-w-0">

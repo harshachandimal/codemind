@@ -8,7 +8,7 @@ export const TraceCallStackPanel: React.FC<Props> = ({ callStack }) => {
   const stackFrames = callStack || [];
 
   return (
-    <div className="box-border h-full w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 flex flex-col">
+    <div className="box-border w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
         Call Stack
         <span className="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-full">
@@ -16,15 +16,14 @@ export const TraceCallStackPanel: React.FC<Props> = ({ callStack }) => {
         </span>
       </h3>
       
-      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+      <div className="space-y-2">
         {stackFrames.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-slate-500 text-sm italic">
+          <div className="text-slate-500 text-sm italic py-2">
             No active call stack for this step.
           </div>
         ) : (
-          <div className="flex flex-col gap-1.5 relative">
+          <>
             {stackFrames.map((frame, index) => {
-              // Highlight recursive calls by checking if the frame appears earlier in the stack
               const isRecursive = stackFrames.findIndex(f => f === frame) < index;
               const isTop = index === stackFrames.length - 1;
               
@@ -39,22 +38,22 @@ export const TraceCallStackPanel: React.FC<Props> = ({ callStack }) => {
                         : 'bg-slate-800/50 border-slate-700/50 text-slate-300'
                   }`}
                 >
-                  <div className="text-xs opacity-50 w-4 text-right">{index}</div>
+                  <div className="text-xs opacity-50 w-4 text-right shrink-0">{index}</div>
                   <div className="break-all min-w-0 flex-1 text-xs">{frame}</div>
                   {isTop && (
-                    <span className="text-[10px] bg-indigo-500/30 text-indigo-300 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] bg-indigo-500/30 text-indigo-300 px-1.5 py-0.5 rounded shrink-0">
                       TOP
                     </span>
                   )}
                   {isRecursive && !isTop && (
-                    <span className="text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded shrink-0">
                       RECURSION
                     </span>
                   )}
                 </div>
               );
             })}
-          </div>
+          </>
         )}
       </div>
     </div>

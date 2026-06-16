@@ -17,7 +17,7 @@ export const TraceVariablesPanel: React.FC<Props> = ({ variables, previousVariab
   ])).sort();
 
   return (
-    <div className="box-border h-full w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 flex flex-col">
+    <div className="box-border w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
         Variables
         <span className="bg-slate-800 text-slate-400 text-xs px-2 py-0.5 rounded-full">
@@ -25,13 +25,13 @@ export const TraceVariablesPanel: React.FC<Props> = ({ variables, previousVariab
         </span>
       </h3>
       
-      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+      <div className="space-y-3">
         {allVarNames.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-slate-500 text-sm italic">
+          <div className="text-slate-500 text-sm italic py-2">
             No variables captured for this step.
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <>
             {allVarNames.map((name) => {
               const currentValue = variables ? variables[name] : undefined;
               const prevValue = previousVariables ? previousVariables[name] : undefined;
@@ -39,7 +39,6 @@ export const TraceVariablesPanel: React.FC<Props> = ({ variables, previousVariab
               const isNew = currentValue !== undefined && prevValue === undefined;
               const isRemoved = currentValue === undefined && prevValue !== undefined;
               const isChangedExplicitly = variableChanges?.includes(name);
-              // Fallback diff if adapter didn't explicitly mark changes but values differ structurally
               const isChangedImplicitly = !isNew && !isRemoved && JSON.stringify(currentValue) !== JSON.stringify(prevValue);
               
               const isChanged = isChangedExplicitly || isChangedImplicitly;
@@ -75,14 +74,14 @@ export const TraceVariablesPanel: React.FC<Props> = ({ variables, previousVariab
                   
                   <div className="flex flex-col gap-1">
                     {!isRemoved && (
-                      <div className="text-xs font-mono text-slate-200 break-all whitespace-normal overflow-hidden bg-slate-950 p-2 rounded border border-slate-800/50 shadow-inner">
+                      <div className="text-xs font-mono text-slate-200 break-all whitespace-normal overflow-x-hidden bg-slate-950 p-2 rounded border border-slate-800/50 shadow-inner">
                         {formatTraceValue(currentValue)}
                       </div>
                     )}
                     {(isChanged || isRemoved) && prevValue !== undefined && (
                       <div className="flex flex-col gap-0.5 mt-1">
                         <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold ml-1">Previous</span>
-                        <div className="text-xs font-mono text-slate-400 break-all bg-slate-900 p-1.5 rounded line-through opacity-70">
+                        <div className="text-xs font-mono text-slate-400 break-all overflow-x-hidden bg-slate-900 p-1.5 rounded line-through opacity-70">
                           {formatTraceValue(prevValue)}
                         </div>
                       </div>
@@ -91,7 +90,7 @@ export const TraceVariablesPanel: React.FC<Props> = ({ variables, previousVariab
                 </div>
               );
             })}
-          </div>
+          </>
         )}
       </div>
     </div>

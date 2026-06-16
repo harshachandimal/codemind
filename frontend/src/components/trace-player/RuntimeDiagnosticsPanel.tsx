@@ -56,11 +56,11 @@ export const RuntimeDiagnosticsPanel: React.FC<Props> = ({ runtimeError, warning
   }
 
   return (
-    <div className="box-border h-full w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 flex flex-col">
+    <div className="box-border w-full min-w-0 rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
         Execution Diagnostics
       </h3>
-      <div className="flex flex-col gap-2 min-w-0 break-words whitespace-normal overflow-y-auto custom-scrollbar flex-1 pr-1">
+      <div className="flex flex-col gap-2 min-w-0 break-words whitespace-normal">
         {issues.length > 0 ? issues : (
           <div className="text-slate-500 text-sm italic">
             No runtime issues detected from the available trace.
