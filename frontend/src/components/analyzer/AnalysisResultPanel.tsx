@@ -8,6 +8,8 @@ import ComplexityLensPanel from '../visualizer/ComplexityLensPanel';
 import RecursionStackPreview from '../visualizer/RecursionStackPreview';
 import RuntimeTraceSummaryPanel from '../trace/RuntimeTraceSummaryPanel';
 import { RuntimeTracePlayer } from '../trace-player/RuntimeTracePlayer';
+import { getRuntimeTraceSteps } from '../../utils/getRuntimeTraceSteps';
+import { TracePlayerStep } from '../../types/tracePlayer';
 import RecursionTreePanel from '../trace/RecursionTreePanel';
 import RecursionUnwindPanel from '../trace/RecursionUnwindPanel';
 import AnalysisExportButtons from './AnalysisExportButtons';
@@ -94,7 +96,7 @@ const AnalysisResultPanel: React.FC<Props> = ({ analysis, readOnly = false, sett
               {/* Recursion Unwinding (renders only if recursive trace exists) */}
               <RecursionUnwindPanel analysis={analysis} />
 
-              <RuntimeTracePlayer rawSteps={analysis.trace_steps} language={analysis.language} />
+              <RuntimeTracePlayer rawSteps={getRuntimeTraceSteps(analysis) as TracePlayerStep[]} language={analysis.language} />
             </>
           )}
         </>

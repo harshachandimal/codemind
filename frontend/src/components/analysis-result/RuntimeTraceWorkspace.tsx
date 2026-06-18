@@ -4,6 +4,7 @@ import { RuntimeTracePlayer } from '../trace-player/RuntimeTracePlayer';
 import { formatTraceValue } from '../../utils/formatTraceValue';
 import { TracePlayerStep } from '../../types/tracePlayer';
 import { RuntimeTraceRunForm } from '../trace-player/RuntimeTraceRunForm';
+import { getRuntimeTraceSteps } from '../../utils/getRuntimeTraceSteps';
 
 type Props = {
   analysis: Analysis;
@@ -21,7 +22,7 @@ export const RuntimeTraceWorkspace: React.FC<Props> = ({
 }) => {
   const hasRuntimeError = !!analysis.trace_error;
   const isRuntimeAvailable = !['unsupported_language', 'unsupported', 'not_available'].includes(analysis.trace_mode as string);
-  const steps = analysis.trace_steps || [];
+  const steps = getRuntimeTraceSteps(analysis) as TracePlayerStep[];
   const hasSteps = steps.length > 0;
 
   const returnedValue = analysis.trace_result?.returnedValue;
