@@ -18,7 +18,7 @@ export function executeIfStatement(
     const condVal = evaluatePythonExpression({ expression: branch.condition, variables, recorder, onFunctionCall });
     const isTrue = isPythonTruthy(condVal);
     recorder.record({
-      line: null,
+      line: stmt.line,
       type: 'condition',
       description: `Condition ${branch.condition} evaluated to ${isTrue}`
     });
@@ -26,7 +26,7 @@ export function executeIfStatement(
     if (isTrue) {
       branchTaken = true;
       recorder.record({
-        line: null,
+        line: stmt.line,
         type: 'branch',
         description: `If branch taken`
       });
@@ -37,7 +37,7 @@ export function executeIfStatement(
   }
   if (!branchTaken && stmt.elseBody) {
     recorder.record({
-      line: null,
+      line: stmt.line,
       type: 'condition',
       description: `Else branch executed.`
     });

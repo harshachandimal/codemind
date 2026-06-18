@@ -457,4 +457,23 @@ def factorial(n):
     const stepTypes = result.steps.map((s: any) => s.type);
     expect(stepTypes).toContain('function_call');
   });
+  it('python_if_elif_else_returns_steps', () => {
+    const sourceCode = `
+def check_number(n):
+    if n > 0:
+        return "positive"
+    elif n < 0:
+        return "negative"
+    else:
+        return "zero"
+    `;
+    const interpreter = new PythonInterpreter();
+    const resultPositive = interpreter.run({ sourceCode, entryFunction: 'check_number', input: [5] });
+    expect(resultPositive.returnedValue).toBe("positive");
+    expect(resultPositive.steps.length).toBeGreaterThan(0);
+    const stepTypes = resultPositive.steps.map(s => s.type);
+    expect(stepTypes).toContain('function_call');
+    expect(stepTypes).toContain('condition');
+    expect(stepTypes).toContain('return');
+  });
 });

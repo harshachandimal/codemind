@@ -23,12 +23,14 @@ export type PythonStatement =
   | PythonForRangeStatement;
 
 export type PythonAssignmentStatement = {
+  line: number;
   type: 'assignment';
   name: string;
   expression: string;
 };
 
 export type PythonAugmentedAssignmentStatement = {
+  line: number;
   type: 'augmented_assignment';
   name: string;
   operator: '+=' | '-=' | '*=' | '/=' | '//=' | '%=';
@@ -36,28 +38,33 @@ export type PythonAugmentedAssignmentStatement = {
 };
 
 export type PythonReturnStatement = {
+  line: number;
   type: 'return';
   expression: string | null;
 };
 
 export type PythonIfStatement = {
+  line: number;
   type: 'if';
   branches: PythonConditionalBranch[];
   elseBody: PythonStatement[] | null;
 };
 
 export type PythonConditionalBranch = {
+  line: number;
   condition: string;
   body: PythonStatement[];
 };
 
 export type PythonWhileStatement = {
+  line: number;
   type: 'while';
   condition: string;
   body: PythonStatement[];
 };
 
 export type PythonForRangeStatement = {
+  line: number;
   type: 'for_range';
   variableName: string;
   rangeArgs: string[];
@@ -66,6 +73,7 @@ export type PythonForRangeStatement = {
 
 // Function types
 export type PythonFunctionDef = {
+  startLine: number;
   type: 'function_def';
   name: string;
   params: string[];

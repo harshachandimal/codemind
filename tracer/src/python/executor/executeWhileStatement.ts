@@ -15,7 +15,7 @@ export function executeWhileStatement(
   state: InterpreterState
 ): { type: 'continue' } | { type: 'return', value: PythonRuntimeValue } {
   recorder.record({
-    line: null,
+    line: stmt.line,
     type: 'loop_start',
     description: `While loop started.`
   });
@@ -28,7 +28,7 @@ export function executeWhileStatement(
       const condVal = evaluatePythonExpression({ expression: stmt.condition, variables, recorder, onFunctionCall });
       const isTrue = isPythonTruthy(condVal);
       recorder.record({
-        line: null,
+        line: stmt.line,
         type: 'condition',
         description: `While condition ${stmt.condition} evaluated to ${isTrue}`
       });
@@ -36,7 +36,7 @@ export function executeWhileStatement(
       
       assertPythonLoopIterationAvailable(iterationCount++);
       recorder.record({
-        line: null,
+        line: stmt.line,
         type: 'loop_iteration',
         description: `Loop iteration ${iterationCount}`
       });
@@ -47,7 +47,7 @@ export function executeWhileStatement(
   } finally {
     state.loopDepth--;
     recorder.record({
-      line: null,
+      line: stmt.line,
       type: 'loop_exit',
       description: `Loop exited.`
     });

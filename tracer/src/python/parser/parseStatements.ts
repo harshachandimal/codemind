@@ -3,7 +3,7 @@ import {
   PythonConditionalBranch
 } from '../ast/pythonAstTypes';
 
-export function parsePythonStatements(lines: string[], baseIndent: number): PythonStatement[] {
+export function parsePythonStatements(lines: {text: string, lineNo: number}[], baseIndent: number): PythonStatement[] {
   const statements: PythonStatement[] = [];
   let i = 0;
 
@@ -12,10 +12,10 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
     return match ? match[1]!.length : 0;
   }
 
-  function consumeIndentedBlock(startIndex: number, indent: number): { blockLines: string[], nextIndex: number } {
-    const blockLines: string[] = [];
+  function consumeIndentedBlock(startIndex: number, indent: number): { blockLines: {text: string, lineNo: number}[], nextIndex: number } {
+    const blockLines: {text: string, lineNo: number}[] = [];
     let idx = startIndex;
-    while (idx < lines.length && (lines[idx]!.trim() === '' || lines[idx]!.trim().startsWith('#') || getIndent(lines[idx]!) >= indent)) {
+    while (idx < lines.length && (lines[idx]!.text.trim() === '' || lines[idx]!.text.trim().startsWith('#') || getIndent(lines[idx]!.text) >= indent)) {
       blockLines.push(lines[idx]!);
       idx++;
     }
@@ -25,8 +25,8 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
   function getNextBodyIndent(startIndex: number): number {
     let idx = startIndex;
     while (idx < lines.length) {
-      if (lines[idx]!.trim() !== '' && !lines[idx]!.trim().startsWith('#')) {
-        return getIndent(lines[idx]!);
+      if (lines[idx]!.text.trim() !== '' && !lines[idx]!.text.trim().startsWith('#')) {
+        return getIndent(lines[idx]!.text);
       }
       idx++;
     }
@@ -34,7 +34,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
   }
 
   while (i < lines.length) {
-    const rawLine = lines[i]!;
+    const rawLine = lines[i]!.text;
     const trimmed = rawLine.trim();
     if (trimmed === '' || trimmed.startsWith('#')) {
       i++;
@@ -56,7 +56,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
 
     if (trimmed.startsWith('return ') || trimmed === 'return') {
       const expr = trimmed.substring(7).trim() || null;
-      statements.push({ type: 'return', expression: expr });
+      statements.push({ line: lines[i]!.lineNo, type: 'return', expression: expr });
       i++;
       continue;
     }
@@ -64,6 +64,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
     const augAssignMatch = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(\+=|-=|\*=|\/=|\/\/=|%=)\s*(.*)$/);
     if (augAssignMatch) {
       statements.push({ 
+        line: lines[i]!.lineNo,
         type: 'augmented_assignment', 
         name: augAssignMatch[1]!, 
         operator: augAssignMatch[2] as any, 
@@ -75,7 +76,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
 
     const assignMatch = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
     if (assignMatch && !trimmed.startsWith('if ') && !trimmed.startsWith('elif ') && !trimmed.startsWith('else:') && !trimmed.startsWith('while ') && !trimmed.startsWith('for ')) {
-      statements.push({ type: 'assignment', name: assignMatch[1]!, expression: assignMatch[2]! });
+      statements.push({ line: lines[i]!.lineNo, type: 'assignment', name: assignMatch[1]!, expression: assignMatch[2]! });
       i++;
       continue;
     }
@@ -89,7 +90,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
       
       const { blockLines, nextIndex } = consumeIndentedBlock(i, bodyIndent);
       const body = parsePythonStatements(blockLines, bodyIndent);
-      statements.push({ type: 'while', condition: conditionMatch[1]!.trim(), body });
+      statements.push({ line: lines[i]!.lineNo, type: 'while', condition: conditionMatch[1]!.trim(), body });
       i = nextIndex;
       continue;
     }
@@ -113,7 +114,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
       
       const { blockLines, nextIndex } = consumeIndentedBlock(i, bodyIndent);
       const body = parsePythonStatements(blockLines, bodyIndent);
-      statements.push({ type: 'for_range', variableName, rangeArgs: args, body });
+      statements.push({ line: lines[i]!.lineNo, type: 'for_range', variableName, rangeArgs: args, body });
       i = nextIndex;
       continue;
     }
@@ -122,7 +123,9 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
       const conditionMatch = trimmed.match(/^if\s+(.*):$/);
       if (!conditionMatch) throw new Error(`Invalid if statement: ${trimmed}`);
       
+      const startLine = lines[i]!.lineNo;
       const ifBranch: PythonConditionalBranch = {
+        line: startLine,
         condition: conditionMatch[1]!.trim(),
         body: []
       };
@@ -139,8 +142,8 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
       let elseBody: PythonStatement[] | null = null;
       
       while (i < lines.length) {
-        const nextTrimmed = lines[i]!.trim();
-        const nextIndent = getIndent(lines[i]!);
+        const nextTrimmed = lines[i]!.text.trim();
+        const nextIndent = getIndent(lines[i]!.text);
         
         if (nextTrimmed === '' || nextTrimmed.startsWith('#')) {
            i++; continue; 
@@ -152,9 +155,11 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
           const elifMatch = nextTrimmed.match(/^elif\s+(.*):$/);
           if (!elifMatch) throw new Error(`Invalid elif statement: ${nextTrimmed}`);
           
+          const elifLine = lines[i]!.lineNo;
           i++;
           const elifRes = consumeIndentedBlock(i, bodyIndent);
           branches.push({
+            line: elifLine,
             condition: elifMatch[1]!.trim(),
             body: parsePythonStatements(elifRes.blockLines, bodyIndent)
           });
@@ -170,7 +175,7 @@ export function parsePythonStatements(lines: string[], baseIndent: number): Pyth
         }
       }
       
-      statements.push({ type: 'if', branches, elseBody });
+      statements.push({ line: startLine, type: 'if', branches, elseBody });
       continue;
     }
     

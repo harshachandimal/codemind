@@ -36,7 +36,7 @@ export function executeFunctionCall(
 
   if (isRecursion) {
     recorder.record({
-      line: null,
+      line: funcDef.startLine,
       type: 'function_call',
       description: `Recursive call ${funcName}`
     });
@@ -56,7 +56,7 @@ export function executeFunctionCall(
     state.callStack.pop();
     if (isRecursion) {
       recorder.record({
-        line: null,
+        line: funcDef.startLine,
         type: 'return',
         description: `Returning from ${funcName} with ${JSON.stringify(retVal)}`
       });

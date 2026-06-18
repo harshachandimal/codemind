@@ -37,7 +37,7 @@ export class PythonInterpreter {
     const recorder = new StepRecorder(state);
 
     recorder.record({
-      line: null,
+      line: entryDef.startLine,
       type: 'function_call',
       description: `Called ${entryDef.name}`
     });

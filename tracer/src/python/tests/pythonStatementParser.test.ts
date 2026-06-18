@@ -7,7 +7,7 @@ describe('Python Statement Parser', () => {
 if n > 0:
     return True
 return False`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(2);
     expect(stmts[0]!.type).toBe('if');
     expect((stmts[0] as any).branches[0].body[0].type).toBe('return');
@@ -20,7 +20,7 @@ if n > 0:
     return "positive"
 else:
     return "zero_or_negative"`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(1);
     expect(stmts[0]!.type).toBe('if');
     expect((stmts[0] as any).elseBody).toBeTruthy();
@@ -34,7 +34,7 @@ elif n < 0:
     return "negative"
 else:
     return "zero"`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(1);
     expect(stmts[0]!.type).toBe('if');
     expect((stmts[0] as any).branches).toHaveLength(2);
@@ -47,7 +47,7 @@ result = "small"
 if n > 10:
     result = "big"
 return result`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(3);
     expect(stmts[0]!.type).toBe('assignment');
     expect(stmts[1]!.type).toBe('if');
@@ -60,7 +60,7 @@ i = 0
 while i < n:
     i += 1
 return i`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(3);
     expect(stmts[0]!.type).toBe('assignment');
     expect(stmts[1]!.type).toBe('while');
@@ -78,7 +78,7 @@ return i`.split('\n');
 for i in range(n):
     result += i
 return result`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(2);
     expect(stmts[0]!.type).toBe('for_range');
     
@@ -92,7 +92,7 @@ return result`.split('\n');
     const source = `
 for i in range(1, n):
     pass`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(1);
     expect((stmts[0] as any).rangeArgs).toEqual(['1', 'n']);
   });
@@ -101,7 +101,7 @@ for i in range(1, n):
     const source = `
 for i in range(1, n, 2):
     pass`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(1);
     expect((stmts[0] as any).rangeArgs).toEqual(['1', 'n', '2']);
   });
@@ -110,14 +110,14 @@ for i in range(1, n, 2):
     const source = `
 for item in arr:
     pass`.split('\n');
-    expect(() => parsePythonStatements(source, 0)).toThrow('Unsupported for statement');
+    expect(() => parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0)).toThrow('Unsupported for statement');
   });
 
   it('rejects_malformed_range', () => {
     const source = `
 for i in range():
     pass`.split('\n');
-    expect(() => parsePythonStatements(source, 0)).toThrow('Unsupported range arguments');
+    expect(() => parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0)).toThrow('Unsupported range arguments');
   });
 
   it('parses_nested_for_range', () => {
@@ -125,7 +125,7 @@ for i in range():
 for i in range(n):
     for j in range(n):
         count += 1`.split('\n');
-    const stmts = parsePythonStatements(source, 0);
+    const stmts = parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0);
     expect(stmts).toHaveLength(1);
     expect(stmts[0]!.type).toBe('for_range');
     expect((stmts[0] as any).body[0].type).toBe('for_range');
@@ -135,6 +135,6 @@ for i in range(n):
     const source = `
 if n > 0:
 return "positive"`.split('\n');
-    expect(() => parsePythonStatements(source, 0)).toThrow('Expected indented block');
+    expect(() => parsePythonStatements(source.map((text, lineNo) => ({ text, lineNo: lineNo + 1 })), 0)).toThrow('Expected indented block');
   });
 });

@@ -5,7 +5,7 @@ import { PythonFunctionCallHandler, evaluatePythonExpression } from '../evaluato
 import { InterpreterState } from '../../types/interpreter';
 
 export function executeAssignment(
-  stmt: { type: 'assignment', name: string, expression: string },
+  stmt: import("../ast/pythonAstTypes").PythonAssignmentStatement,
   variables: Record<string, PythonRuntimeValue>,
   recorder: StepRecorder,
   onFunctionCall: PythonFunctionCallHandler
@@ -13,14 +13,14 @@ export function executeAssignment(
   const val = evaluatePythonExpression({ expression: stmt.expression, variables, recorder, onFunctionCall });
   variables[stmt.name] = val;
   recorder.record({
-    line: null,
+    line: stmt.line,
     type: 'assignment',
     description: `Assigned ${stmt.name} = ${JSON.stringify(val)}`
   });
 }
 
 export function executeAugmentedAssignment(
-  stmt: { type: 'augmented_assignment', name: string, operator: string, expression: string },
+  stmt: import("../ast/pythonAstTypes").PythonAugmentedAssignmentStatement,
   variables: Record<string, PythonRuntimeValue>,
   recorder: StepRecorder,
   onFunctionCall: PythonFunctionCallHandler
@@ -40,7 +40,7 @@ export function executeAugmentedAssignment(
   
   variables[stmt.name] = newVal;
   recorder.record({
-    line: null,
+    line: stmt.line,
     type: 'assignment',
     description: `Assigned ${stmt.name} = ${JSON.stringify(newVal)}`
   });

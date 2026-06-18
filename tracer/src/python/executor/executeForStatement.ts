@@ -40,7 +40,7 @@ export function executeForStatement(
   }
   
   recorder.record({
-    line: null,
+    line: stmt.line,
     type: 'loop_start',
     description: `For loop started over range(${start}, ${stop}, ${step}).`
   });
@@ -55,7 +55,7 @@ export function executeForStatement(
       assertPythonLoopIterationAvailable(iterationCount++);
       variables[stmt.variableName] = i;
       recorder.record({
-        line: null,
+        line: stmt.line,
         type: 'loop_iteration',
         description: `Loop iteration ${iterationCount}, ${stmt.variableName} = ${i}`
       });
@@ -68,7 +68,7 @@ export function executeForStatement(
   } finally {
     state.loopDepth--;
     recorder.record({
-      line: null,
+      line: stmt.line,
       type: 'loop_exit',
       description: `Loop exited.`
     });

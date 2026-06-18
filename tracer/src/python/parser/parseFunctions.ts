@@ -6,6 +6,7 @@ export type PythonFunctionDefinition = {
   name: string;
   params: string[];
   body: PythonStatement[];
+  startLine: number;
 };
 
 export function parsePythonFunctions(sourceCode: string): PythonFunctionDefinition[] {
@@ -46,7 +47,7 @@ export function parsePythonFunctions(sourceCode: string): PythonFunctionDefiniti
       const name = defMatch[1]!;
       const paramsStr = defMatch[2]!.trim();
       const params = paramsStr ? paramsStr.split(',').map(p => p.trim()) : [];
-      currentFunc = { name, params, body: [] };
+      currentFunc = { name, params, body: [], startLine: i + 1 };
       (currentFunc as any)._rawBodyLines = [];
       currentIndent = indentLevel;
       continue;
@@ -55,17 +56,17 @@ export function parsePythonFunctions(sourceCode: string): PythonFunctionDefiniti
     if (currentFunc) {
       if (indentLevel <= currentIndent && trimmed !== '') {
         // Function ended naturally
-        currentFunc.body = parsePythonStatements((currentFunc as any)._rawBodyLines, getIndent((currentFunc as any)._rawBodyLines.find((l: string) => l.trim() !== '') || '    '));
+        currentFunc.body = parsePythonStatements((currentFunc as any)._rawBodyLines, getIndent((currentFunc as any)._rawBodyLines.find((l: any) => l.text.trim() !== '')?.text || '    '));
         functions.push(currentFunc);
         currentFunc = null;
       } else {
-        (currentFunc as any)._rawBodyLines.push(rawLine);
+        (currentFunc as any)._rawBodyLines.push({ text: rawLine, lineNo: i + 1 });
       }
     }
   }
 
   if (currentFunc) {
-    currentFunc.body = parsePythonStatements((currentFunc as any)._rawBodyLines, getIndent((currentFunc as any)._rawBodyLines.find((l: string) => l.trim() !== '') || '    '));
+    currentFunc.body = parsePythonStatements((currentFunc as any)._rawBodyLines, getIndent((currentFunc as any)._rawBodyLines.find((l: any) => l.text.trim() !== '')?.text || '    '));
     functions.push(currentFunc);
   }
 
