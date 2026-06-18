@@ -16,5 +16,5 @@ export function executeIncrement(stmt: JavaIncrementStatement, env: JavaEnvironm
 
   env.variables.set(stmt.name, result);
   env.varStore[stmt.name] = result;
-  env.addStep('assignment', 'Assigned to variable ' + stmt.name);
+  env.addStep('assignment', 'Assigned to variable ' + stmt.name, stmt.line);
 }

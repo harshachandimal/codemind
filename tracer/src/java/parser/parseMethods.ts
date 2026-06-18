@@ -11,6 +11,7 @@ export type JavaMethodDefinition = {
   name: string;
   params: JavaParameterDefinition[];
   bodyText: string;
+  startLine: number;
 };
 
 export function parseJavaMethods(sourceCode: string): JavaMethodDefinition[] {
@@ -27,9 +28,15 @@ export function parseJavaMethods(sourceCode: string): JavaMethodDefinition[] {
       return { typeName: parts[0] as any, name: parts[1] || '' };
     });
 
-    let depth = 1;
     let i = match.index + match[0].length;
     let body = '';
+
+    let startLine = 1;
+    for (let k = 0; k < i; k++) {
+      if (sourceCode[k] === '\n') startLine++;
+    }
+
+    let depth = 1;
     while (i < sourceCode.length && depth > 0) {
       if (sourceCode[i] === '{') depth++;
       else if (sourceCode[i] === '}') depth--;
@@ -45,9 +52,11 @@ export function parseJavaMethods(sourceCode: string): JavaMethodDefinition[] {
       throw new TraceInterpreterError('JAVA_PARSE_ERROR: Nested methods are not supported');
     }
 
-    const cleanBody = body.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    const cleanBody = body
+      .replace(/\/\/.*$/gm, m => ' '.repeat(m.length))
+      .replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '));
 
-    methods.push({ returnType, name, params, bodyText: cleanBody });
+    methods.push({ returnType, name, params, bodyText: cleanBody, startLine });
   }
 
   return methods;

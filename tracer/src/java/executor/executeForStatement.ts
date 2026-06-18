@@ -15,7 +15,7 @@ export function executeForStatement(stmt: JavaForStatement, env: JavaEnvironment
     else if (stmt.init.type === 'assignment') executeAssignment(stmt.init, env);
   }
 
-  env.addStep('loop_start' as any, 'For loop started');
+  env.addStep('loop_start' as any, 'For loop started', stmt.line);
   env.loopDepth++;
   
   try {
@@ -34,14 +34,14 @@ export function executeForStatement(stmt: JavaForStatement, env: JavaEnvironment
         });
         const isTrue = assertJavaBooleanCondition(conditionValue);
 
-        env.addStep('condition_evaluation' as any, 'For condition ' + stmt.condition + ' evaluated to ' + isTrue);
+        env.addStep('condition_evaluation' as any, 'For condition ' + stmt.condition + ' evaluated to ' + isTrue, stmt.line);
 
         if (!isTrue) {
           break;
         }
       }
 
-      env.addStep('loop_iteration' as any, 'For loop iteration ' + (iterationCount + 1));
+      env.addStep('loop_iteration' as any, 'For loop iteration ' + (iterationCount + 1), stmt.line);
       
       executeProgram(stmt.body, env);
       if (env.hasReturned) {
@@ -58,6 +58,6 @@ export function executeForStatement(stmt: JavaForStatement, env: JavaEnvironment
     }
   } finally {
     env.loopDepth--;
-    env.addStep('loop_exit' as any, 'For loop exited');
+    env.addStep('loop_exit' as any, 'For loop exited', stmt.line);
   }
 }

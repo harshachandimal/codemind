@@ -18,11 +18,11 @@ export class JavaEnvironment {
     this.callStack = [entryFunction];
   }
 
-  public addStep(type: TraceStep['type'], desc: string) {
+  public addStep(type: TraceStep['type'], desc: string, line: number | null = null) {
     this.stepCount++;
     this.steps.push({
       step: this.stepCount,
-      line: null,
+      line: line,
       type,
       description: desc,
       variables: { ...this.varStore },

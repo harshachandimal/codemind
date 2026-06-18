@@ -29,5 +29,5 @@ export function executeVariableDeclaration(stmt: JavaVariableDeclarationStatemen
 
   env.variables.set(stmt.name, val);
   env.varStore[stmt.name] = javaValueToRuntimeValue(val as any);
-  env.addStep('variable_declaration', 'Declared variable ' + stmt.name);
+  env.addStep('variable_declaration', 'Declared variable ' + stmt.name, stmt.line);
 }

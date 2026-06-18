@@ -9,7 +9,7 @@ describe('javaMethodParser', () => {
     expect(methods.length).toBe(1);
     expect(methods[0].name).toBe('add');
     expect(methods[0].returnType).toBe('int');
-    expect(methods[0].bodyText).toBe('int result = a + b; return result;');
+    expect(methods[0].bodyText.trim()).toBe('int result = a + b; return result;');
   });
 
   it('B) parses_params', () => {
@@ -36,10 +36,11 @@ describe('javaMethodParser', () => {
     expect(methods[1].name).toBe('b');
   });
 
-  it('E) ignores_comments', () => {
+  it('E) ignores_comments_by_replacing_with_spaces', () => {
     const source = 'public class Main { public static int add(int a, int b) { // comment\n int result = a + b; /* inline */ return result; } }';
     const methods = parseJavaMethods(source) as any;
     expect(methods[0].bodyText).toContain('int result = a + b;');
+    expect(methods[0].bodyText).toContain('          \n'); // Replaced comment
   });
 
   it('F) rejects_non_static_method', () => {

@@ -4,7 +4,7 @@ import { parseJavaStatements } from '../parser/parseStatements';
 describe('javaStatementParser', () => {
   it('A) parses_variable_declaration_with_init', () => {
     const stmts = parseJavaStatements('int result = a + b;');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'variable_declaration',
       typeName: 'int',
       name: 'result',
@@ -14,7 +14,7 @@ describe('javaStatementParser', () => {
 
   it('B) parses_variable_declaration_without_init', () => {
     const stmts = parseJavaStatements('int result;');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'variable_declaration',
       typeName: 'int',
       name: 'result',
@@ -24,7 +24,7 @@ describe('javaStatementParser', () => {
 
   it('C) parses_assignment', () => {
     const stmts = parseJavaStatements('result = result + 1;');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'assignment',
       name: 'result',
       expression: 'result + 1'
@@ -33,7 +33,7 @@ describe('javaStatementParser', () => {
 
   it('D) parses_return_expression', () => {
     const stmts = parseJavaStatements('return result;');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'return',
       expression: 'result'
     });
@@ -41,7 +41,7 @@ describe('javaStatementParser', () => {
 
   it('E) parses_empty_return', () => {
     const stmts = parseJavaStatements('return;');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'return',
       expression: null
     });
@@ -55,7 +55,7 @@ describe('javaStatementParser', () => {
       return false;
     `;
     const stmts = parseJavaStatements(code);
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'if',
       branches: [
         {
@@ -65,7 +65,7 @@ describe('javaStatementParser', () => {
       ],
       elseBody: null
     });
-    expect(stmts[1]).toEqual({ type: 'return', expression: 'false' });
+    expect(stmts[1]).toMatchObject({ type: 'return', expression: 'false' });
   });
 
   it('G) parses_if_else', () => {
@@ -77,7 +77,7 @@ describe('javaStatementParser', () => {
       }
     `;
     const stmts = parseJavaStatements(code);
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'if',
       branches: [
         { condition: 'n > 0', body: [{ type: 'return', expression: '"positive"' }] }
@@ -97,7 +97,7 @@ describe('javaStatementParser', () => {
       }
     `;
     const stmts = parseJavaStatements(code);
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'if',
       branches: [
         { condition: 'n > 0', body: [{ type: 'return', expression: '"positive"' }] },
@@ -243,7 +243,7 @@ describe('javaStatementParser', () => {
 
   it('V) parses_array_declaration_initializer', () => {
     const stmts = parseJavaStatements('int[] arr = {1, 2, 3};');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'variable_declaration',
       typeName: 'int[]',
       name: 'arr',
@@ -253,7 +253,7 @@ describe('javaStatementParser', () => {
 
   it('W) parses_string_array_initializer', () => {
     const stmts = parseJavaStatements('String[] names = {"a", "b"};');
-    expect(stmts[0]).toEqual({
+    expect(stmts[0]).toMatchObject({
       type: 'variable_declaration',
       typeName: 'String[]',
       name: 'names',

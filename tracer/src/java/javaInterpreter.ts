@@ -82,9 +82,9 @@ export class JavaInterpreter {
       return this.executeMethod(callParams.methodName, callParams.args, env, methods);
     };
 
-    env.addStep('function_call', 'Entered method ' + input.entryFunction);
+    env.addStep('function_call', 'Entered method ' + input.entryFunction, entryMethod.startLine);
 
-    const statements = parseJavaStatements(entryMethod.bodyText);
+    const statements = parseJavaStatements(entryMethod.bodyText, entryMethod.startLine);
     executeProgram(statements, env);
 
     if (!env.hasReturned) {
@@ -132,17 +132,17 @@ export class JavaInterpreter {
       env.varStore[param.name] = argValue;
     });
 
-    env.addStep('function_call', `Recursive call ${methodName}(...)`);
+    env.addStep('function_call', `Recursive call ${methodName}(...)`, method.startLine);
 
     try {
-      const statements = parseJavaStatements(method.bodyText);
+      const statements = parseJavaStatements(method.bodyText, method.startLine);
       executeProgram(statements, env);
 
       if (!env.hasReturned) {
         if (method.returnType !== 'void') {
           throw new TraceInterpreterError('JAVA_RUNTIME_TYPE_ERROR: Method missing return statement');
         }
-        env.addStep('return', `Returning from ${methodName} with null`);
+        env.addStep('return', `Returning from ${methodName} with null`, method.startLine);
       }
       return env.returnedValue ?? null;
     } finally {

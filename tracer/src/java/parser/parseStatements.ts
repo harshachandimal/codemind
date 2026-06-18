@@ -1,6 +1,10 @@
 import { TraceInterpreterError } from '../errors/javaErrors';
 
-export type JavaStatement = 
+export type JavaStatementBase = {
+  line: number;
+};
+
+export type JavaStatement = JavaStatementBase & (
   | JavaVariableDeclarationStatement 
   | JavaAssignmentStatement 
   | JavaAugmentedAssignmentStatement
@@ -8,9 +12,11 @@ export type JavaStatement =
   | JavaReturnStatement
   | JavaIfStatement
   | JavaWhileStatement
-  | JavaForStatement;
+  | JavaForStatement
+);
 
 export type JavaVariableDeclarationStatement = {
+  line: number;
   type: 'variable_declaration';
   typeName: 'int' | 'double' | 'boolean' | 'String' | 'int[]' | 'double[]' | 'boolean[]' | 'String[]' | 'int[][]' | 'double[][]' | 'boolean[][]' | 'String[][]';
   name: string;
@@ -18,12 +24,14 @@ export type JavaVariableDeclarationStatement = {
 };
 
 export type JavaAssignmentStatement = {
+  line: number;
   type: 'assignment';
   name: string;
   expression: string;
 };
 
 export type JavaAugmentedAssignmentStatement = {
+  line: number;
   type: 'augmented_assignment';
   name: string;
   operator: '+=' | '-=' | '*=' | '/=' | '%=';
@@ -31,12 +39,14 @@ export type JavaAugmentedAssignmentStatement = {
 };
 
 export type JavaIncrementStatement = {
+  line: number;
   type: 'increment';
   name: string;
   operator: '++' | '--';
 };
 
 export type JavaReturnStatement = {
+  line: number;
   type: 'return';
   expression: string | null;
 };
@@ -47,27 +57,25 @@ export type JavaConditionalBranch = {
 };
 
 export type JavaIfStatement = {
+  line: number;
   type: 'if';
   branches: JavaConditionalBranch[];
   elseBody: JavaStatement[] | null;
 };
 
 export type JavaWhileStatement = {
+  line: number;
   type: 'while';
   condition: string;
   body: JavaStatement[];
 };
 
-export type JavaForInitStatement =
-  | JavaVariableDeclarationStatement
-  | JavaAssignmentStatement;
+export type JavaForInitStatement = (JavaStatementBase & JavaVariableDeclarationStatement) | (JavaStatementBase & JavaAssignmentStatement);
 
-export type JavaForUpdateStatement =
-  | JavaAssignmentStatement
-  | JavaAugmentedAssignmentStatement
-  | JavaIncrementStatement;
+export type JavaForUpdateStatement = (JavaStatementBase & JavaAssignmentStatement) | (JavaStatementBase & JavaAugmentedAssignmentStatement) | (JavaStatementBase & JavaIncrementStatement);
 
 export type JavaForStatement = {
+  line: number;
   type: 'for';
   init: JavaForInitStatement | null;
   condition: string | null;
@@ -75,9 +83,17 @@ export type JavaForStatement = {
   body: JavaStatement[];
 };
 
-export function parseJavaStatements(bodyText: string): JavaStatement[] {
+export function parseJavaStatements(bodyText: string, startLine: number = 1): JavaStatement[] {
   const result: JavaStatement[] = [];
   let pos = 0;
+
+  function getLine(p: number) {
+    let line = startLine;
+    for (let i = 0; i < p; i++) {
+      if (bodyText[i] === '\n') line++;
+    }
+    return line;
+  }
 
   function skipWhitespace() {
     while (pos < bodyText.length && /\s/.test(bodyText[pos] as string)) {
@@ -95,7 +111,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     return val;
   }
 
-  function readBlock(): string {
+  function readBlock(): { text: string; startPos: number } {
     skipWhitespace();
     if (bodyText[pos] !== '{') {
       throw new TraceInterpreterError('JAVA_PARSE_ERROR: Expected { for block');
@@ -109,7 +125,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
       pos++;
     }
     if (depth !== 0) throw new TraceInterpreterError('JAVA_PARSE_ERROR: Unbalanced braces in block');
-    return bodyText.substring(start, pos - 1);
+    return { text: bodyText.substring(start, pos - 1), startPos: start };
   }
 
   function parseCondition(): string {
@@ -127,11 +143,12 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     return bodyText.substring(condStart, pos - 1).trim();
   }
 
-  function parseIfStatement(): JavaIfStatement {
+  function parseIfStatement(stmtStartPos: number): JavaStatementBase & JavaIfStatement {
+    const line = getLine(stmtStartPos);
     const condition = parseCondition();
-    const blockText = readBlock();
+    const block = readBlock();
     const branches: JavaConditionalBranch[] = [
-      { condition, body: parseJavaStatements(blockText) }
+      { condition, body: parseJavaStatements(block.text, getLine(block.startPos)) }
     ];
     let elseBody: JavaStatement[] | null = null;
 
@@ -150,11 +167,11 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
 
         if (isElseIf) {
           const econdition = parseCondition();
-          const eblockText = readBlock();
-          branches.push({ condition: econdition, body: parseJavaStatements(eblockText) });
+          const eblock = readBlock();
+          branches.push({ condition: econdition, body: parseJavaStatements(eblock.text, getLine(eblock.startPos)) });
         } else {
-          const eblockText = readBlock();
-          elseBody = parseJavaStatements(eblockText);
+          const eblock = readBlock();
+          elseBody = parseJavaStatements(eblock.text, getLine(eblock.startPos));
           break;
         }
       } else {
@@ -162,20 +179,23 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
       }
     }
 
-    return { type: 'if', branches, elseBody };
+    return { type: 'if', line, branches, elseBody };
   }
 
-  function parseWhileStatement(): JavaWhileStatement {
+  function parseWhileStatement(stmtStartPos: number): JavaStatementBase & JavaWhileStatement {
+    const line = getLine(stmtStartPos);
     const condition = parseCondition();
-    const blockText = readBlock();
+    const block = readBlock();
     return {
       type: 'while',
+      line,
       condition,
-      body: parseJavaStatements(blockText)
+      body: parseJavaStatements(block.text, getLine(block.startPos))
     };
   }
 
-  function parseForStatement(): JavaForStatement {
+  function parseForStatement(stmtStartPos: number): JavaStatementBase & JavaForStatement {
+    const line = getLine(stmtStartPos);
     const header = parseCondition();
     if (header.includes(':')) {
         throw new TraceInterpreterError('JAVA_UNSUPPORTED_STATEMENT: Enhanced for loop is not supported');
@@ -191,7 +211,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
 
     const initStr = parts[0]!.trim();
     if (initStr) {
-        const parsedInit = parseSimpleStatementInner(initStr);
+        const parsedInit = parseSimpleStatementInner(initStr, stmtStartPos);
         if (!parsedInit || (parsedInit.type !== 'variable_declaration' && parsedInit.type !== 'assignment')) {
             throw new TraceInterpreterError('JAVA_PARSE_ERROR: Invalid for loop init');
         }
@@ -205,31 +225,34 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
 
     const updateStr = parts[2]!.trim();
     if (updateStr) {
-        const parsedUpdate = parseSimpleStatementInner(updateStr);
+        // use stmtStartPos for update line as well, it's just one line typically
+        const parsedUpdate = parseSimpleStatementInner(updateStr, stmtStartPos);
         if (!parsedUpdate || (parsedUpdate.type !== 'assignment' && parsedUpdate.type !== 'augmented_assignment' && parsedUpdate.type !== 'increment')) {
             throw new TraceInterpreterError('JAVA_PARSE_ERROR: Invalid for loop update');
         }
         update = parsedUpdate as JavaForUpdateStatement;
     }
 
-    const blockText = readBlock();
+    const block = readBlock();
 
     return {
         type: 'for',
+        line,
         init,
         condition,
         update,
-        body: parseJavaStatements(blockText)
+        body: parseJavaStatements(block.text, getLine(block.startPos))
     };
   }
 
-  function parseSimpleStatementInner(stmt: string): JavaStatement | undefined {
+  function parseSimpleStatementInner(stmt: string, stmtStartPos: number): JavaStatement | undefined {
     stmt = stmt.trim();
     if (!stmt) return undefined;
+    const line = getLine(stmtStartPos);
     
     if (stmt.startsWith('return ') || stmt === 'return') {
       const expr = stmt.replace(/^return\b/, '').trim();
-      return { type: 'return', expression: expr || null };
+      return { type: 'return', line, expression: expr || null };
     }
 
     const declMatch = stmt.match(/^((?:int|double|boolean|String)(?:\[\]){0,2})\s+([A-Za-z0-9_]+)(?:\s*=\s*(.*))?$/);
@@ -240,6 +263,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
       }
       return {
         type: 'variable_declaration',
+        line,
         typeName: declMatch[1] as any,
         name: declMatch[2] || '',
         expression: expr
@@ -250,6 +274,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     if (augAssignMatch) {
       return {
         type: 'augmented_assignment',
+        line,
         name: augAssignMatch[1] || '',
         operator: augAssignMatch[2] as any,
         expression: augAssignMatch[3] || ''
@@ -260,6 +285,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     if (assignMatch) {
       return {
         type: 'assignment',
+        line,
         name: assignMatch[1] || '',
         expression: assignMatch[2] || ''
       };
@@ -269,6 +295,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     if (postfixMatch) {
       return {
         type: 'increment',
+        line,
         name: postfixMatch[1] || '',
         operator: postfixMatch[2] as any
       };
@@ -278,6 +305,7 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     if (prefixMatch) {
       return {
         type: 'increment',
+        line,
         name: prefixMatch[2] || '',
         operator: prefixMatch[1] as any
       };
@@ -286,8 +314,8 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     throw new TraceInterpreterError('JAVA_UNSUPPORTED_STATEMENT: Unsupported statement "' + stmt + '"');
   }
 
-  function parseSimpleStatement(stmt: string) {
-      const parsed = parseSimpleStatementInner(stmt);
+  function parseSimpleStatement(stmt: string, stmtStartPos: number) {
+      const parsed = parseSimpleStatementInner(stmt, stmtStartPos);
       if (parsed) result.push(parsed);
   }
 
@@ -296,17 +324,21 @@ export function parseJavaStatements(bodyText: string): JavaStatement[] {
     if (pos >= bodyText.length) break;
 
     if (bodyText.startsWith('if', pos) && (pos + 2 === bodyText.length || /\s|\(/.test(bodyText[pos + 2] as string))) {
+      const stmtStartPos = pos;
       pos += 2;
-      result.push(parseIfStatement());
+      result.push(parseIfStatement(stmtStartPos));
     } else if (bodyText.startsWith('for', pos) && (pos + 3 === bodyText.length || /\s|\(/.test(bodyText[pos + 3] as string))) {
+      const stmtStartPos = pos;
       pos += 3;
-      result.push(parseForStatement());
+      result.push(parseForStatement(stmtStartPos));
     } else if (bodyText.startsWith('while', pos) && (pos + 5 === bodyText.length || /\s|\(/.test(bodyText[pos + 5] as string))) {
+      const stmtStartPos = pos;
       pos += 5;
-      result.push(parseWhileStatement());
+      result.push(parseWhileStatement(stmtStartPos));
     } else {
+      const stmtStartPos = pos;
       const stmt = readUntil(';');
-      parseSimpleStatement(stmt);
+      parseSimpleStatement(stmt, stmtStartPos);
     }
   }
 

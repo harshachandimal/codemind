@@ -18,7 +18,7 @@ export function executeIfStatement(stmt: JavaIfStatement, env: JavaEnvironment) 
     const isTrue = assertJavaBooleanCondition(conditionValue);
 
     // Using condition_evaluation as requested for condition tracing
-    env.addStep('condition_evaluation' as any, 'Condition ' + branch.condition + ' evaluated to ' + isTrue);
+    env.addStep('condition_evaluation' as any, 'Condition ' + branch.condition + ' evaluated to ' + isTrue, stmt.line);
 
     if (isTrue) {
       branchTaken = true;
@@ -28,7 +28,7 @@ export function executeIfStatement(stmt: JavaIfStatement, env: JavaEnvironment) 
   }
 
   if (!branchTaken && stmt.elseBody) {
-    env.addStep('condition_evaluation' as any, 'Else branch executed');
+    env.addStep('condition_evaluation' as any, 'Else branch executed', stmt.line);
     executeProgram(stmt.elseBody, env);
   }
 }

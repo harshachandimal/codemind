@@ -6,7 +6,7 @@ import { executeProgram } from './executeProgram';
 import { assertJavaLoopIterationAvailable, assertJavaLoopDepthAvailable } from '../javaLoopGuards';
 
 export function executeWhileStatement(stmt: JavaWhileStatement, env: JavaEnvironment) {
-  env.addStep('loop_start' as any, 'While loop started');
+  env.addStep('loop_start' as any, 'While loop started', stmt.line);
   env.loopDepth++;
   
   try {
@@ -24,13 +24,13 @@ export function executeWhileStatement(stmt: JavaWhileStatement, env: JavaEnviron
       });
       const isTrue = assertJavaBooleanCondition(conditionValue);
 
-      env.addStep('condition_evaluation' as any, 'While condition ' + stmt.condition + ' evaluated to ' + isTrue);
+      env.addStep('condition_evaluation' as any, 'While condition ' + stmt.condition + ' evaluated to ' + isTrue, stmt.line);
 
       if (!isTrue) {
         break;
       }
 
-      env.addStep('loop_iteration' as any, 'While loop iteration ' + (iterationCount + 1));
+      env.addStep('loop_iteration' as any, 'While loop iteration ' + (iterationCount + 1), stmt.line);
       
       executeProgram(stmt.body, env);
       if (env.hasReturned) {
@@ -41,6 +41,6 @@ export function executeWhileStatement(stmt: JavaWhileStatement, env: JavaEnviron
     }
   } finally {
     env.loopDepth--;
-    env.addStep('loop_exit' as any, 'While loop exited');
+    env.addStep('loop_exit' as any, 'While loop exited', stmt.line);
   }
 }

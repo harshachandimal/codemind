@@ -10,5 +10,5 @@ export function executeReturnStatement(stmt: JavaReturnStatement, env: JavaEnvir
   }
   env.hasReturned = true;
   const entryFunction = env.callStack[env.callStack.length - 1] || 'method';
-  env.addStep('return', 'Returned from ' + entryFunction);
+  env.addStep('return', 'Returned from ' + entryFunction, stmt.line);
 }
